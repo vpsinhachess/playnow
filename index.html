@@ -351,7 +351,7 @@ html,body{overflow:hidden} body{margin:0}
 .home-screen,.setup-screen{height:100%;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px}
 .home-card,.setup-card{width:min(760px,100%);background:var(--panel);border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 28px rgba(0,0,0,.10);padding:28px}
 .home-card{text-align:center}.home-title{font-size:clamp(30px,5vw,48px);font-weight:900;letter-spacing:-1px}.home-sub{color:var(--muted);margin:8px 0 26px}
-.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.mode-card{border:1px solid var(--border);background:var(--panel2);color:var(--text);border-radius:12px;padding:22px;text-align:left;transition:.15s}.mode-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.mode-card{border:1px solid var(--border);background:var(--panel2);color:var(--text);border-radius:12px;padding:22px;text-align:left;transition:.15s}.mode-card:hover{border-color:var(--accent);transform:translateY(-1px)}
 .mode-icon{font-size:34px;margin-bottom:10px}.mode-card h2{font-size:18px;margin:0 0 6px}.mode-card p{font-size:12px;color:var(--muted);margin:0;line-height:1.5}.home-note{margin-top:20px;color:var(--muted);font-size:11px}
 .setup-card{width:min(520px,100%)}.setup-title{font-size:24px;font-weight:900}.setup-sub{font-size:12px;color:var(--muted);margin:4px 0 18px}.field{margin:13px 0}.field label{display:block;font-size:11px;font-weight:800;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
 .pc-select{width:100%;height:42px;border:1px solid var(--border);border-radius:8px;background:var(--panel2);color:var(--text);padding:0 10px;outline:none}.level-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.level-btn{height:38px;border:1px solid var(--border);border-radius:7px;background:var(--panel2);color:var(--text);font-weight:800}.level-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -379,6 +379,7 @@ html,body{overflow:hidden} body{margin:0}
 <div class="mode-grid">
 <button class="mode-card" id="computerBtn"><div class="mode-icon">♟</div><h2>Play with Computer</h2><p>Play against Stockfish — Level 1 to Level 10.</p></button>
 <button class="mode-card" id="friendBtn"><div class="mode-icon">♟♟</div><h2>Play with Friend</h2><p>Two players • Same device • No online connection.</p></button>
+<button class="mode-card" id="selfBtn"><div class="mode-icon">♟</div><h2>Play with Self</h2><p>Play both White and Black yourself.</p></button>
 </div><div class="home-note">Simple to start • Easy to play • Ready to grow</div>
 </div></section>
 
@@ -438,7 +439,7 @@ function fillClock(el){el.innerHTML="";Object.keys(CLOCKS).forEach(k=>{const o=d
 for(let i=1;i<=10;i++){const b=document.createElement("button");b.className="level-btn"+(i===S.level?" active":"");b.textContent=i;b.onclick=()=>{S.level=i;document.querySelectorAll(".level-btn").forEach(x=>x.classList.remove("active"));b.classList.add("active")};$("levelGrid").appendChild(b)}
 function showHome(){stopClock();stopEngine();S.gameOver=true;$("gameScreen").style.display="none";$("setupScreen").style.display="none";$("homeScreen").style.display="flex"}
 function showSetup(mode){stopClock();stopEngine();S.mode=mode;$("homeScreen").style.display="none";$("gameScreen").style.display="none";$("setupScreen").style.display="flex";$("setupTitle").textContent=mode==="computer"?"Play with Computer":"Play with Friend";$("setupSub").textContent=mode==="computer"?"Choose your side, Stockfish level and optional clock.":"Choose colors and an optional chess clock.";$("levelField").style.display=mode==="computer"?"block":"none";$("engineNote").style.display=mode==="computer"?"block":"none";$("colorSelect").value="w";$("setupClock").value=S.nextClockKey||"off"}
-$("computerBtn").onclick=()=>showSetup("computer");$("friendBtn").onclick=()=>showSetup("friend");$("backBtn").onclick=showHome;
+$("computerBtn").onclick=()=>showSetup("computer");$("friendBtn").onclick=()=>showSetup("friend");$("selfBtn").onclick=()=>showSetup("self");$("backBtn").onclick=showHome;
 $("startBtn").onclick=()=>{let c=$("colorSelect").value;if(c==="random")c=Math.random()<.5?"w":"b";S.humanColor=c;S.engineColor=c==="w"?"b":"w";S.clockKey=$("setupClock").value;S.nextClockKey=S.clockKey;startNewGame()};
 function startNewGame(){
   stopClock();stopEngine();
@@ -452,7 +453,7 @@ function startNewGame(){
   const c=CLOCKS[S.clockKey]||CLOCKS.off;S.clockBase=c.base;S.clockInc=c.inc;S.whiteMs=c.base*1000;S.blackMs=c.base*1000;
   $("whiteName").textContent=S.mode==="computer"?(S.humanColor==="w"?"You":"Stockfish"):"Player 1";
   $("blackName").textContent=S.mode==="computer"?(S.humanColor==="b"?"You":"Stockfish"):"Player 2";
-  $("modePill").textContent=S.mode==="computer"?"COMPUTER":"FRIEND";
+  $("modePill").textContent=S.mode==="computer"?"COMPUTER":S.mode==="friend"?"FRIEND":"SELF";
   $("gameClockSelect").value=S.clockKey;
   $("resultLine").classList.remove("result-show");
   $("engineStatus").className="engine-status";
