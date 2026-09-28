@@ -112,7 +112,7 @@ button:focus-visible,.tab:focus-visible{outline:3px solid rgba(9,105,232,.25);ou
 .room-chip{font-size:.78rem;color:var(--muted);padding:6px 9px;border:1px solid var(--border);border-radius:7px;}
 .game-layout{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:12px;padding:8px;}
 .board-zone{min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-#board{width:min(100%,calc(100dvh - 70px));height:auto;max-width:100%;max-height:calc(100dvh - 70px);aspect-ratio:1/1;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);border-radius:2px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.28);touch-action:manipulation;flex:0 0 auto;}
+#board{width:min(100%,calc(100dvh - 70px));height:min(100%,calc(100dvh - 70px));max-width:100%;max-height:100%;aspect-ratio:1/1;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);border-radius:2px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.28);touch-action:manipulation;flex:0 0 auto;}
 #board{position:relative;}
 #board .arrow-layer{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none;overflow:visible;}
 #board .arrow-line{fill:none;stroke-width:.16;stroke-linecap:round;stroke-linejoin:round;}
@@ -363,13 +363,19 @@ html,body{overflow:hidden} body{margin:0}
 .player-row.active-turn{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}.player-row .clock.off{opacity:.45}.result-line.result-show{display:flex}.result-line{display:none}.move-row.current{background:rgba(47,126,234,.12);box-shadow:inset 3px 0 0 var(--accent2)}.move-cell.current{background:rgba(111,75,47,.13);border-radius:4px;padding:2px 4px}
 .promotion-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}.promotion-btn{height:62px;border:1px solid var(--border);background:var(--panel2);border-radius:8px}.promotion-btn img{width:48px;height:48px}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}.modal.show{display:flex}.modal-card{width:min(400px,100%);background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.22)}.modal-title{font-size:18px;font-weight:900}.modal-text{font-size:12px;color:var(--muted);line-height:1.5;margin-top:7px}.modal-actions{display:flex;gap:7px;margin-top:16px}.modal-actions button{flex:1;padding:8px;border-radius:7px;border:1px solid var(--border);font-weight:800}.modal-actions .ok{background:var(--accent);color:#fff;border-color:var(--accent)}
-.board-piece{width:100%;height:100%;object-fit:contain;padding:2%;position:relative;z-index:2;pointer-events:none;user-select:none;-webkit-user-drag:none}.sq{position:relative}.sq.check-square{box-shadow:inset 0 0 0 5px rgba(211,74,74,.82)}.sq.last-from,.sq.last-to{background-image:linear-gradient(rgba(246,211,101,.30),rgba(246,211,101,.30))}.sq.sel{box-shadow:inset 0 0 0 4px rgba(246,211,101,.98)}.sq.move::after{z-index:3}.coord{z-index:4}
+.board-piece{width:100%;height:100%;object-fit:contain;padding:2%;position:relative;z-index:2;pointer-events:none;user-select:none;-webkit-user-drag:none}.friend-black-piece{transform:rotate(180deg)}.sq{position:relative}.sq.check-square{box-shadow:inset 0 0 0 5px rgba(211,74,74,.82)}.sq.last-from,.sq.last-to{background-image:linear-gradient(rgba(246,211,101,.30),rgba(246,211,101,.30))}.sq.sel{box-shadow:inset 0 0 0 4px rgba(246,211,101,.98)}.sq.move::after{z-index:3}.coord{z-index:4}
 @media(max-width:900px) and (orientation:portrait){html,body{overflow:auto}.game-app{height:auto;min-height:100dvh;grid-template-rows:48px auto}.game-layout{height:auto;min-height:0;display:grid;grid-template-columns:1fr;gap:6px;padding:4px}.board-zone{height:auto;overflow:hidden}#board{width:min(calc(100vw - 8px),calc(100dvh - 180px));height:auto;max-width:calc(100vw - 8px);max-height:none}.side-panel{height:auto;max-height:none;overflow:hidden}.notation-wrap{height:clamp(150px,24vh,260px);min-height:150px;flex:0 0 auto}}
 @media(max-width:560px){.mode-grid{grid-template-columns:1fr}.home-card,.setup-card{padding:18px}.home-title{font-size:30px}.setup-actions{grid-template-columns:1fr 1.7fr}.clock{font-size:1.15rem;min-width:78px}.move-nav button,.control-grid button,.game-actions button{padding:7px 5px;font-size:.72rem}}
 
 
 /* V3 FIDE + game-control corrections */
 .draw-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}.draw-actions button{width:100%;margin:0;padding:8px 7px}.draw-actions button:disabled{opacity:.45;cursor:not-allowed}.fide-note{font-size:.62rem;color:var(--muted);text-align:center;margin-top:4px}.engine-status.ready{color:var(--accent2);font-weight:800}.engine-status.error{color:var(--danger);font-weight:800}.board-legal-badge{font-size:.62rem;color:var(--muted);text-align:center;margin-top:2px}.draw-pending{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+
+/* FINAL BOARD GEOMETRY LOCK — keep the board exactly square in every supported viewport. */
+@media (min-width:901px){#board{width:min(100%,calc(100dvh - 70px));height:min(100%,calc(100dvh - 70px));max-width:100%;max-height:100%;}}
+@media (min-width:721px) and (max-width:900px){#board{width:min(100%,calc(100dvh - 65px));height:min(100%,calc(100dvh - 65px));max-width:100%;max-height:100%;}}
+@media (max-width:720px) and (orientation:landscape){#board{width:min(100%,calc(100dvh - 56px));height:min(100%,calc(100dvh - 56px));max-width:100%;max-height:100%;}}
+@media (max-width:900px) and (orientation:portrait){#board{width:min(calc(100vw - 8px),calc(100dvh - 180px));height:min(calc(100vw - 8px),calc(100dvh - 180px));max-width:calc(100vw - 8px);max-height:none;}}
 </style>
 </head>
 <body>
@@ -378,8 +384,8 @@ html,body{overflow:hidden} body{margin:0}
 <div class="home-title">MYCHESS64</div><div class="home-sub">PLAY CHESS</div>
 <div class="mode-grid">
 <button class="mode-card" id="computerBtn"><div class="mode-icon">♟</div><h2>Play with Computer</h2><p>Play against Stockfish — Level 1 to Level 10.</p></button>
-<button class="mode-card" id="friendBtn"><div class="mode-icon">♟♟</div><h2>Play with Friend</h2><p>Two players • Same device • No online connection.</p></button>
-<button class="mode-card" id="selfBtn"><div class="mode-icon">♟</div><h2>Play with Self</h2><p>Play both White and Black yourself.</p></button>
+<button class="mode-card" id="selfBtn"><div class="mode-icon">♟</div><h2>Play with Self</h2><p>Play both sides • Board rotates after every move.</p></button>
+<button class="mode-card" id="friendBtn"><div class="mode-icon">♟♟</div><h2>Play with Friend</h2><p>Two players • Same device • Opposite pieces face each player.</p></button>
 </div><div class="home-note">Simple to start • Easy to play • Ready to grow</div>
 </div></section>
 
@@ -389,7 +395,7 @@ html,body{overflow:hidden} body{margin:0}
 <div class="field" id="levelField"><label>Stockfish Level</label><div class="level-grid" id="levelGrid"></div></div>
 <div class="field"><label>Chess Clock</label><select id="setupClock" class="pc-select"></select></div>
 <div class="setup-actions"><button id="backBtn">Back</button><button id="startBtn" class="start">Start Game</button></div>
-<div class="engine-note" id="engineNote">Stockfish loads only when Computer mode starts. This version uses the JS-only Stockfish 19 browser fallback, so no WASM file is required.</div>
+<div class="engine-note" id="engineNote">Stockfish loads only when Computer mode starts. This version uses a same-origin Worker wrapper with Stockfish.js for reliable browser loading.</div>
 </div></section>
 
 <section id="gameScreen" class="game-app" style="display:none">
@@ -438,21 +444,21 @@ $("themeBtn").onclick=()=>{document.body.classList.toggle("dark-theme");localSto
 function fillClock(el){el.innerHTML="";Object.keys(CLOCKS).forEach(k=>{const o=document.createElement("option");o.value=k;o.textContent=CLOCKS[k].label;el.appendChild(o)})}fillClock($("setupClock"));fillClock($("gameClockSelect"));
 for(let i=1;i<=10;i++){const b=document.createElement("button");b.className="level-btn"+(i===S.level?" active":"");b.textContent=i;b.onclick=()=>{S.level=i;document.querySelectorAll(".level-btn").forEach(x=>x.classList.remove("active"));b.classList.add("active")};$("levelGrid").appendChild(b)}
 function showHome(){stopClock();stopEngine();S.gameOver=true;$("gameScreen").style.display="none";$("setupScreen").style.display="none";$("homeScreen").style.display="flex"}
-function showSetup(mode){stopClock();stopEngine();S.mode=mode;$("homeScreen").style.display="none";$("gameScreen").style.display="none";$("setupScreen").style.display="flex";$("setupTitle").textContent=mode==="computer"?"Play with Computer":"Play with Friend";$("setupSub").textContent=mode==="computer"?"Choose your side, Stockfish level and optional clock.":"Choose colors and an optional chess clock.";$("levelField").style.display=mode==="computer"?"block":"none";$("engineNote").style.display=mode==="computer"?"block":"none";$("colorSelect").value="w";$("setupClock").value=S.nextClockKey||"off"}
+function showSetup(mode){stopClock();stopEngine();S.mode=mode;$("homeScreen").style.display="none";$("gameScreen").style.display="none";$("setupScreen").style.display="flex";const isComputer=mode==="computer",isSelf=mode==="self";$("setupTitle").textContent=isComputer?"Play with Computer":isSelf?"Play with Self":"Play with Friend";$("setupSub").textContent=isComputer?"Choose your side, Stockfish level and optional clock.":isSelf?"Play both sides. The board rotates 180° after every move.":"Two players on one device. The board stays fixed and Black pieces face the opposite player.";$("levelField").style.display=isComputer?"block":"none";$("engineNote").style.display=isComputer?"block":"none";$("colorSelect").value="w";$("setupClock").value=S.nextClockKey||"off"}
 $("computerBtn").onclick=()=>showSetup("computer");$("friendBtn").onclick=()=>showSetup("friend");$("selfBtn").onclick=()=>showSetup("self");$("backBtn").onclick=showHome;
 $("startBtn").onclick=()=>{let c=$("colorSelect").value;if(c==="random")c=Math.random()<.5?"w":"b";S.humanColor=c;S.engineColor=c==="w"?"b":"w";S.clockKey=$("setupClock").value;S.nextClockKey=S.clockKey;startNewGame()};
 function startNewGame(){
   stopClock();stopEngine();
   S.engineSession++;
   S.game=new Chess();S.history=[];S.viewPly=0;
-  /* FIDE display convention: the player's own side is at the bottom.
-     In Friend mode the board automatically rotates after every move so
-     the player whose turn it is sees their own side at the bottom. */
+  /* Board perspective rules: Computer = human side at bottom; Self = rotate after every move; Friend = fixed board with Black artwork rotated 180 degrees. */
+
+
   S.orientation=S.mode==="computer"?S.humanColor:"w";
   S.selected=null;S.targets={};S.lastMove=null;S.lastMover=null;S.gameOver=false;S.drawOffer=null;S.pendingPromotion=null;
   const c=CLOCKS[S.clockKey]||CLOCKS.off;S.clockBase=c.base;S.clockInc=c.inc;S.whiteMs=c.base*1000;S.blackMs=c.base*1000;
-  $("whiteName").textContent=S.mode==="computer"?(S.humanColor==="w"?"You":"Stockfish"):"Player 1";
-  $("blackName").textContent=S.mode==="computer"?(S.humanColor==="b"?"You":"Stockfish"):"Player 2";
+  $("whiteName").textContent=S.mode==="computer"?(S.humanColor==="w"?"You":"Stockfish"):(S.mode==="self"?"You — White":"Player 1");
+  $("blackName").textContent=S.mode==="computer"?(S.humanColor==="b"?"You":"Stockfish"):(S.mode==="self"?"You — Black":"Player 2");
   $("modePill").textContent=S.mode==="computer"?"COMPUTER":S.mode==="friend"?"FRIEND":"SELF";
   $("gameClockSelect").value=S.clockKey;
   $("resultLine").classList.remove("result-show");
@@ -487,7 +493,7 @@ function renderBoard(){
     if(g.in_check()&&kingSquare(g,g.turn())===sq)d.classList.add("check-square");
     if(r===7){const c=document.createElement("span");c.className="coord file";c.textContent=FILES[fi];d.appendChild(c)}
     if(f===7){const c=document.createElement("span");c.className="coord rank";c.textContent=rank;d.appendChild(c)}
-    if(p){const img=document.createElement("img");img.className="board-piece";img.src=PIECE_URL+p.color+p.type.toUpperCase()+".svg";img.alt="";img.draggable=false;d.appendChild(img)}
+    if(p){const img=document.createElement("img");img.className="board-piece"+(S.mode==="friend"&&p.color==="b"?" friend-black-piece":"");img.src=PIECE_URL+p.color+p.type.toUpperCase()+".svg";img.alt="";img.draggable=false;d.appendChild(img)}
     d.onpointerdown=e=>{e.preventDefault();if(live)onSquare(sq)};b.appendChild(d)
   }
   $("livePill").textContent=live?"LIVE":"REVIEW";$("livePill").classList.toggle("review",!live);
@@ -501,18 +507,18 @@ function playMove(from,to,promotion){
   if(S.clockBase>0&&S.clockActive===color)S[color==="w"?"whiteMs":"blackMs"]+=S.clockInc*1000;
   const afterFen=S.game.fen();
   S.history.push({from:m.from,to:m.to,san:m.san,promotion:m.promotion||null,color,fen:afterFen,beforeFen,beforeWhiteMs:beforeW,beforeBlackMs:beforeB,afterWhiteMs:S.whiteMs,afterBlackMs:S.blackMs});
-  S.viewPly=S.history.length;S.lastMove={from:m.from,to:m.to};S.lastMover=color;S.selected=null;S.targets={};S.drawOffer=null;
+  S.viewPly=S.history.length;if(S.mode==="self")S.orientation=S.history.length%2===0?"w":"b";else if(S.mode==="friend")S.orientation="w";else S.orientation=S.humanColor;S.lastMove={from:m.from,to:m.to};S.lastMover=color;S.selected=null;S.targets={};S.drawOffer=null;
   /* Friend mode: rotate 180° after each move so the next player sees
      their own pieces from their own side of the board. */
-  if(S.mode==="friend")S.orientation=color==="w"?"b":"w";
+  if(S.mode==="self")S.orientation=color==="w"?"b":"w";
   renderAll();updateActionButtons();
-  if(S.game.game_over()){finishGame();return true}
+  if(isFideAutomaticEnd()){finishGame();return true}
   if(S.clockBase>0)startClock(S.game.turn());
   if(S.mode==="computer"&&S.game.turn()===S.engineColor)requestEngineMove();
   return true;
 }
 function openPromotion(from,to){S.pendingPromotion={from,to};const box=$("promotionGrid");box.innerHTML="";["q","r","b","n"].forEach(t=>{const b=document.createElement("button");b.className="promotion-btn";const i=document.createElement("img");i.src=PIECE_URL+S.game.turn()+t.toUpperCase()+".svg";b.appendChild(i);b.onclick=()=>{const p=S.pendingPromotion;S.pendingPromotion=null;$("promotionModal").classList.remove("show");playMove(p.from,p.to,t)};box.appendChild(b)});$("promotionModal").classList.add("show")}
-function renderStatus(){if(!S.game)return;const side=S.game.turn()==="w"?"White":"Black";$("statusMain").textContent=S.gameOver?$("resultText").textContent:side+(S.game.in_check()?" in Check":" to Move");$("statusSub").textContent=S.gameOver?$("resultReason").textContent:(S.mode==="computer"?"Stockfish Level "+S.level:"Same Device");$("whiteRow").classList.toggle("active-turn",S.game.turn()==="w"&&!S.gameOver&&S.viewPly===S.history.length);$("blackRow").classList.toggle("active-turn",S.game.turn()==="b"&&!S.gameOver&&S.viewPly===S.history.length)}
+function renderStatus(){if(!S.game)return;const side=S.game.turn()==="w"?"White":"Black";$("statusMain").textContent=S.gameOver?$("resultText").textContent:side+(S.game.in_check()?" in Check":" to Move");$("statusSub").textContent=S.gameOver?$("resultReason").textContent:(S.mode==="computer"?"Stockfish Level "+S.level:S.mode==="self"?"Play both sides — board rotates after every move":"Same device — Black pieces face the opposite player");$("whiteRow").classList.toggle("active-turn",S.game.turn()==="w"&&!S.gameOver&&S.viewPly===S.history.length);$("blackRow").classList.toggle("active-turn",S.game.turn()==="b"&&!S.gameOver&&S.viewPly===S.history.length)}
 function renderNotation(){const n=$("notation");n.innerHTML="";if(!S.history.length){n.innerHTML='<div style="color:var(--muted);padding:8px">No moves yet.</div>';return}for(let i=0;i<S.history.length;i+=2){const row=document.createElement("div");row.className="move-row";if(S.viewPly>=i+1&&S.viewPly<=i+2)row.classList.add("current");const no=document.createElement("div");no.className="move-no";no.textContent=(i/2+1)+".";const w=document.createElement("div");w.className="move-cell";w.textContent=S.history[i]?.san||"";if(S.viewPly===i+1)w.classList.add("current");const bl=document.createElement("div");bl.className="move-cell";bl.textContent=S.history[i+1]?.san||"";if(S.viewPly===i+2)bl.classList.add("current");row.append(no,w,bl);row.onclick=()=>goToPly(S.viewPly===i+1?i+2:i+1);n.appendChild(row)}const c=n.querySelector(".current");if(c)requestAnimationFrame(()=>c.scrollIntoView({block:"nearest"}))}
 function renderAll(){renderBoard();renderNotation();renderStatus();updateClocks()}
 function goToPly(p){if(p<0||p>S.history.length)return;if(S.engineBusy)stopEngine();stopClock();S.viewPly=p;S.selected=null;S.targets={};renderAll();updateActionButtons();if(p!==S.history.length){$("statusMain").textContent="Move "+p+" / "+S.history.length;$("statusSub").textContent="Review mode — use Last to return to live";return}if(!S.gameOver){if(S.clockBase>0)startClock(S.game.turn());if(S.mode==="computer"&&S.game.turn()===S.engineColor)requestEngineMove()}}
@@ -521,7 +527,10 @@ function startClock(side){stopClock();if(!S.clockBase||S.gameOver||S.viewPly!==S
 function stopClock(){if(S.clockTimer){clearInterval(S.clockTimer);S.clockTimer=null}S.clockActive=null}
 function fmt(ms){const t=Math.max(0,Math.ceil(ms/1000)),m=Math.floor(t/60),s=t%60;return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
 function updateClocks(){const on=S.clockBase>0;$("whiteClock").classList.toggle("off",!on);$("blackClock").classList.toggle("off",!on);$("whiteClock").textContent=on?fmt(S.whiteMs):"--:--";$("blackClock").textContent=on?fmt(S.blackMs):"--:--"}
-function finishGame(){let title="Game Over",reason="Game finished";if(S.game.in_checkmate()){title=(S.game.turn()==="w"?"Black":"White")+" Wins";reason="Checkmate"}else if(S.game.in_stalemate()){title="Draw";reason="Stalemate"}else if(typeof S.game.insufficient_material==="function"&&S.game.insufficient_material()){title="Draw";reason="Insufficient material"}else if(typeof S.game.in_threefold_repetition==="function"&&S.game.in_threefold_repetition()){title="Draw";reason="Threefold repetition"}else if(S.game.in_draw()){title="Draw";reason="Draw"}finishCustom(title,reason)}
+function positionKeyFromFen(fen){return String(fen||"").split(" ").slice(0,4).join(" ");}
+function repetitionCount(){const counts=new Map();let g=new Chess();counts.set(positionKeyFromFen(g.fen()),1);for(const h of S.history){try{g.move({from:h.from,to:h.to,promotion:h.promotion||"q"});const k=positionKeyFromFen(g.fen());counts.set(k,(counts.get(k)||0)+1)}catch(e){}}return Math.max(...counts.values());}
+function isFideAutomaticEnd(){if(!S.game)return false;if(S.game.in_checkmate()||S.game.in_stalemate())return true;if(typeof S.game.insufficient_material==="function"&&S.game.insufficient_material())return true;if(repetitionCount()>=5)return true;const halfmove=Number(S.game.fen().split(" ")[4]||0);return halfmove>=150;}
+function finishGame(){let title="Game Over",reason="Game finished";if(S.game.in_checkmate()){title=(S.game.turn()==="w"?"Black":"White")+" Wins";reason="Checkmate"}else if(S.game.in_stalemate()){title="Draw";reason="Stalemate"}else if(typeof S.game.insufficient_material==="function"&&S.game.insufficient_material()){title="Draw";reason="Insufficient material"}else if(repetitionCount()>=5){title="Draw";reason="Fivefold repetition"}else if(Number(S.game.fen().split(" ")[4]||0)>=150){title="Draw";reason="75-move rule"}finishCustom(title,reason)}
 function finishCustom(t,r){stopClock();stopEngine();S.gameOver=true;S.drawOffer=null;$("resultText").textContent=t;$("resultReason").textContent=r;$("resultLine").classList.add("result-show");$("statusMain").textContent=t;$("statusSub").textContent=r;$("whiteRow").classList.remove("active-turn");$("blackRow").classList.remove("active-turn");$("engineStatus").textContent="Game over";updateActionButtons()}
 function currentPlayerName(color){return color==="w"?$("whiteName").textContent:$("blackName").textContent}
 function canOfferDraw(){return S.mode==="friend"&&!S.gameOver&&S.viewPly===S.history.length&&S.history.length>0&&!S.drawOffer}
@@ -530,14 +539,14 @@ function showDrawOfferToOpponent(offeringColor){$("drawModalText").textContent=c
 $("drawAccept").onclick=()=>{$("drawModal").classList.remove("show");if(S.drawOffer)finishCustom("Draw","Draw by agreement");S.drawOffer=null;updateActionButtons()};
 $("drawDecline").onclick=()=>{$("drawModal").classList.remove("show");S.drawOffer=null;$("engineStatus").textContent="Draw offer declined";updateActionButtons()};
 $("drawBtn").onclick=offerDraw;
-function takeback(){if(S.gameOver||!S.history.length||S.viewPly!==S.history.length)return;stopClock();if(S.engineBusy)stopEngine();let count=S.mode==="computer"?Math.min(2,S.history.length):1;let target=S.history.length-count;if(target<0)target=0;const snap=target===0?null:S.history[target];S.history.splice(target,count);S.game=new Chess();for(const h of S.history)S.game.move({from:h.from,to:h.to,promotion:h.promotion||"q"});if(snap){S.whiteMs=snap.afterWhiteMs;S.blackMs=snap.afterBlackMs}else{const c=CLOCKS[S.clockKey]||CLOCKS.off;S.whiteMs=c.base*1000;S.blackMs=c.base*1000}S.viewPly=S.history.length;S.lastMove=S.history.length?{from:S.history[S.history.length-1].from,to:S.history[S.history.length-1].to}:null;S.lastMover=S.history.length?S.history[S.history.length-1].color:null;S.selected=null;S.targets={};S.drawOffer=null;S.gameOver=false;S.engineSession++;renderAll();updateActionButtons();if(S.clockBase>0)startClock(S.game.turn());if(S.mode==="computer"&&S.game.turn()===S.engineColor)requestEngineMove()}
+function takeback(){if(S.gameOver||!S.history.length||S.viewPly!==S.history.length)return;stopClock();if(S.engineBusy)stopEngine();let count=S.mode==="computer"?Math.min(2,S.history.length):1;let target=S.history.length-count;if(target<0)target=0;const snap=target===0?null:S.history[target];S.history.splice(target,count);S.game=new Chess();for(const h of S.history)S.game.move({from:h.from,to:h.to,promotion:h.promotion||"q"});if(snap){S.whiteMs=snap.afterWhiteMs;S.blackMs=snap.afterBlackMs}else{const c=CLOCKS[S.clockKey]||CLOCKS.off;S.whiteMs=c.base*1000;S.blackMs=c.base*1000}S.viewPly=S.history.length;if(S.mode==="self")S.orientation=S.history.length%2===0?"w":"b";else if(S.mode==="friend")S.orientation="w";else S.orientation=S.humanColor;S.lastMove=S.history.length?{from:S.history[S.history.length-1].from,to:S.history[S.history.length-1].to}:null;S.lastMover=S.history.length?S.history[S.history.length-1].color:null;S.selected=null;S.targets={};S.drawOffer=null;S.gameOver=false;S.engineSession++;renderAll();updateActionButtons();if(S.clockBase>0)startClock(S.game.turn());if(S.mode==="computer"&&S.game.turn()===S.engineColor)requestEngineMove()}
 $("takebackBtn").onclick=takeback;
 $("resignBtn").onclick=()=>{if(!S.gameOver){const side=S.game.turn()==="w"?"White":"Black";showModal("Resign Game",side+" to move. Confirm resignation?",()=>finishCustom((side==="White"?"Black":"White")+" Wins",side+" resigned"))}};
 $("newGameBtn").onclick=()=>showModal("New Game","Start a new game with the current mode and setup?",startNewGame);
 $("homeBtn").onclick=()=>showModal("Return Home","Leave the current game?",showHome);$("homeGameBtn").onclick=showHome;
-$("flipBtn").onclick=()=>{S.orientation=S.orientation==="w"?"b":"w";renderBoard()};
+$("flipBtn").onclick=()=>{if(S.mode==="friend")return;S.orientation=S.orientation==="w"?"b":"w";renderBoard()};
 $("clockApply").onclick=()=>{S.nextClockKey=$("gameClockSelect").value;$("engineStatus").textContent="Clock " + CLOCKS[S.nextClockKey].label + " selected for the next game."};
-function updateActionButtons(){const live=S.viewPly===S.history.length&&!S.gameOver;$("takebackBtn").disabled=!live||!S.history.length;$("drawBtn").disabled=!canOfferDraw();if(S.mode!=="friend")$("drawBtn").style.display="none";else $("drawBtn").style.display="block";if(S.drawOffer){$("drawBtn").textContent="Draw Offered";$("drawBtn").classList.add("draw-pending")}else{$("drawBtn").textContent="Offer Draw";$("drawBtn").classList.remove("draw-pending")}}
+function updateActionButtons(){const live=S.viewPly===S.history.length&&!S.gameOver;$("takebackBtn").disabled=!live||!S.history.length;$("drawBtn").disabled=!canOfferDraw();$("drawBtn").style.display=S.mode==="friend"?"block":"none";$("flipBtn").disabled=S.mode==="friend";$("flipBtn").title=S.mode==="friend"?"Fixed board in Friend mode":"Flip board";if(S.drawOffer){$("drawBtn").textContent="Draw Offered";$("drawBtn").classList.add("draw-pending")}else{$("drawBtn").textContent="Offer Draw";$("drawBtn").classList.remove("draw-pending")}}
 function showModal(t,x,ok){$("modalTitle").textContent=t;$("modalText").textContent=x||"";modalOK=ok;$("modal").classList.add("show")}
 $("modalCancel").onclick=()=>{$("modal").classList.remove("show");modalOK=null};$("modalOk").onclick=()=>{const f=modalOK;$("modal").classList.remove("show");modalOK=null;if(f)f()};
 function stopEngine(){
