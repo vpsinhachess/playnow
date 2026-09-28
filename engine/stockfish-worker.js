@@ -7,4 +7,3 @@ try {
 } catch (e) {
   postMessage('MYCHESS64_ENGINE_LOAD_ERROR ' + (e && e.message ? e.message : e));
 }
-
