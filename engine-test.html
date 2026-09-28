@@ -1,0 +1,11 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MyChess64 Stockfish Engine Test</title>
+<style>body{font-family:Arial,sans-serif;margin:0;background:#f4f7fb;color:#10253e;padding:20px}main{max-width:650px;margin:auto;background:#fff;padding:20px;border-radius:16px;box-shadow:0 8px 30px #0001}h1{margin-top:0}button{padding:12px 16px;margin:5px;border:0;border-radius:9px;background:#0969e8;color:#fff;font-weight:700}.box{margin-top:15px;padding:14px;background:#f7f9fc;border-radius:10px;white-space:pre-wrap;word-break:break-word}.ok{color:#087a57;font-weight:700}.err{color:#c44343;font-weight:700}</style></head>
+<body><main><h1>MyChess64 Stockfish Test</h1><p>This page tests the exact worker used by Play Chess.</p><button id="start">Start Engine Test</button><button id="stop">Stop</button><div id="status" class="box">Not started</div><div id="output" class="box">Waiting…</div></main>
+<script>
+let w=null,timer=null,started=false,uci=false,ready=false;
+const $=id=>document.getElementById(id);
+function log(x){$('output').textContent+=x+'\n'}
+$('start').onclick=()=>{if(w){w.terminate();w=null} $('status').textContent='Creating same-origin worker…';$('output').textContent='';try{w=new Worker('./engine/stockfish-worker.js')}catch(e){$('status').className='box err';$('status').textContent='Worker creation failed: '+e;return}timer=setTimeout(()=>{if(!ready){$('status').className='box err';$('status').textContent='TIMEOUT: Stockfish did not reach readyok within 20 seconds.'}},20000);w.onerror=e=>{$('status').className='box err';$('status').textContent='WORKER ERROR';log(String(e.message||e))};w.onmessage=e=>{const m=String(e.data||'');log(m);if(m==='uciok'){uci=true;$('status').textContent='UCI OK — checking readiness…';w.postMessage('isready')}else if(m==='readyok'){ready=true;clearTimeout(timer);$('status').className='box ok';$('status').textContent='STOCKFISH READY — requesting test move…';w.postMessage('ucinewgame');w.postMessage('position startpos');w.postMessage('go depth 8')}else if(m.startsWith('bestmove')){$('status').className='box ok';$('status').textContent='SUCCESS — '+m}};w.postMessage('uci')};
+$('stop').onclick=()=>{if(w){try{w.postMessage('stop')}catch(e){}w.terminate();w=null}$('status').textContent='Stopped'};
+</script></body></html>

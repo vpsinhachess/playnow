@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0969e8">
+<title>MyChess64 — Play Chess V3</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<style>
+
+:root{
+  --bg:#f4f7fb; --panel:#ffffff; --panel2:#f7f9fc; --text:#10253e; --muted:#66758a;
+  --accent:#0969e8; --accent2:#0b7a75; --border:#d9e2ec;
+  --sq-light:#f0d9b5; --sq-dark:#b58863; --sq-sel:#f6d365; --sq-move:#5b9f55;
+  --danger:#c44343; --clock:#0b1d33;
+}
+body.dark-theme{
+  --bg:#0b1220; --panel:#111b2d; --panel2:#162238; --text:#edf4ff; --muted:#9fb0c5;
+  --accent:#2f82ff; --accent2:#2fb6a7; --border:#263850;
+  --sq-light:#e8cda0; --sq-dark:#9c6b45; --sq-sel:#e0b74a; --sq-move:#5fae63;
+  --clock:#07101d;
+}
+*{box-sizing:border-box;}
+html,body{width:100%;height:100%;margin:0;overflow:hidden;}
+body{background:radial-gradient(circle at top,#eef5ff 0,#f4f7fb 45%,#edf2f8 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;transition:background .2s,color .2s;}
+button,input,select{font:inherit;}
+button{cursor:pointer;}
+.wrap{width:100%;height:100%;padding:0;margin:0;max-width:none;}
+body:not(:has(.game-app)) .wrap{display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto;min-height:100dvh;}
+body:not(:has(.game-app)) .wrap>.card,body:not(:has(.game-app)) #content>.card{max-width:720px;width:100%;}
+body:not(:has(.game-app)) #content>.card{padding:30px 30px 24px;box-shadow:0 18px 55px rgba(14,40,70,.12);border-color:#dbe5f0;}
+body:not(:has(.game-app)) .lobby-card{max-width:560px;padding:30px 32px 22px;}
+.lobby-card .tabs{margin-bottom:18px;}
+.lobby-intro{text-align:center;margin:-4px 0 20px;}
+.lobby-title{font-size:clamp(1.35rem,3vw,1.7rem);font-weight:900;letter-spacing:-.03em;color:#09223d;margin:0 0 5px;}
+.lobby-subtitle{font-size:.9rem;color:var(--muted);line-height:1.5;margin:0 auto;max-width:430px;}
+.lobby-section{background:linear-gradient(180deg,#fbfdff,#f5f8fc);border:1px solid #e0e8f1;border-radius:14px;padding:16px;}
+.lobby-section label{font-weight:800;color:#344a61;margin-bottom:6px;}
+.lobby-section input{min-height:46px;margin-bottom:14px;font-size:.96rem;}
+.lobby-actions{display:grid;grid-template-columns:1fr;gap:8px;margin-top:2px;}
+.lobby-actions button{width:100%;margin:0;min-height:46px;font-size:.95rem;}
+.lobby-hint{display:flex;gap:7px;align-items:flex-start;font-size:.76rem;color:var(--muted);line-height:1.45;margin-top:10px;}
+.lobby-hint::before{content:'ⓘ';font-size:.8rem;flex:0 0 auto;}
+.color-row{margin-bottom:12px;}
+.color-btn{min-height:42px;}
+.waiting-card{text-align:center;}
+.waiting-card .code-badge{font-size:1.25rem;letter-spacing:4px;padding:9px 15px;margin:5px 0 4px;}
+.waiting-title{font-size:1.25rem;font-weight:900;margin:0 0 5px;color:#09223d;}
+.waiting-subtitle{margin:0 0 16px;color:var(--muted);font-size:.86rem;line-height:1.45;}
+.share-row{display:grid;grid-template-columns:1fr auto;gap:7px;margin:10px 0 8px;}
+.share-row input{margin:0;min-width:0;font-size:.8rem;}
+.share-row button{margin:0;min-height:42px;white-space:nowrap;}
+.connection-card{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;border-radius:9px;background:#f4f8fd;border:1px solid #dbe6f1;color:#41566d;font-size:.8rem;margin:10px 0;}
+.connection-dot{width:8px;height:8px;border-radius:50%;background:#d99a18;box-shadow:0 0 0 4px rgba(217,154,24,.12);}
+.connection-dot.connected{background:#2b9a58;box-shadow:0 0 0 4px rgba(43,154,88,.12);}
+.connection-dot.error{background:#c44343;box-shadow:0 0 0 4px rgba(196,67,67,.12);}
+.status-chip{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;color:var(--muted);padding:5px 8px;border:1px solid var(--border);border-radius:999px;background:var(--panel2);white-space:nowrap;}
+.status-chip .connection-dot{width:7px;height:7px;box-shadow:none;}
+.result-card{margin:6px 10px 0;padding:9px 10px;border:1px solid #d7e2ec;border-radius:10px;background:linear-gradient(180deg,#fbfdff,#f3f7fb);text-align:center;}
+.result-kicker{font-size:.67rem;letter-spacing:.12em;text-transform:uppercase;font-weight:900;color:var(--muted);}
+.result-main{font-size:1.08rem;font-weight:900;color:#09223d;margin-top:3px;}
+.result-reason{font-size:.72rem;color:var(--muted);margin-top:3px;}
+body.dark-theme .lobby-section{background:linear-gradient(180deg,#142238,#111b2d);border-color:#2a3b54;}
+body.dark-theme .lobby-title,body.dark-theme .waiting-title,body.dark-theme .result-main{color:var(--text);}
+body.dark-theme .lobby-section label{color:#d6e2f0;}
+body.dark-theme .connection-card{background:#132137;border-color:#2a3b54;color:#b7c7d9;}
+body.dark-theme .result-card{background:linear-gradient(180deg,#142238,#101a2b);border-color:#2a3b54;}
+
+body:has(.game-app) #content{height:100%;}
+body:has(.game-app) .wrap{height:100%;}
+h1,.sub{display:none;}
+.card{background:rgba(255,255,255,.97);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:0 4px 20px rgba(0,0,0,.08);}
+.lobby-brand{text-align:center;margin-bottom:20px;}
+.lobby-brand-logo{width:190px;height:126px;object-fit:contain;display:block;margin:0 auto 2px;}
+.lobby-brand-name,.lobby-tagline{display:none;}
+.brand-note{margin-top:18px;padding-top:14px;border-top:1px solid var(--border);text-align:center;font-size:.92rem;line-height:1.5;color:#5e6f83;}
+.brand-note strong{color:#09223d;font-weight:900;}
+.brand-note strong:first-child{font-size:1.08rem;letter-spacing:.01em;}
+.brand-note strong:last-child{font-size:1rem;}
+
+label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px;}
+input,select{width:100%;padding:10px 12px;border-radius:9px;border:1px solid var(--border);background:var(--panel2);color:var(--text);margin-bottom:12px;}
+button{font-size:.9rem;padding:10px 14px;border-radius:9px;border:0;background:linear-gradient(135deg,#0869e8,#0757c9);color:#fff;margin-right:6px;margin-bottom:6px;box-shadow:0 4px 10px rgba(9,105,232,.16);font-weight:700;}
+button.secondary{background:#eef5ff;color:#075fcf;border:1px solid #a9c9f3;box-shadow:none;}
+button.ghost{background:transparent;color:var(--text);border:1px solid var(--border);box-shadow:none;}
+button.icon-btn{width:38px;height:38px;padding:0;margin:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);background:var(--panel);color:var(--text);box-shadow:none;}
+button:disabled{opacity:.45;cursor:default;}
+input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(9,105,232,.11);}
+button:focus-visible,.tab:focus-visible{outline:3px solid rgba(9,105,232,.25);outline-offset:2px;}
+
+.tabs{display:flex;gap:8px;margin-bottom:20px;background:#f2f6fb;padding:5px;border-radius:12px;width:100%;}
+.tab{flex:1;min-width:0;text-align:center;padding:12px 10px;border-radius:9px;border:0;cursor:pointer;color:var(--muted);font-weight:800;white-space:nowrap;line-height:1.1;}
+.tab.active{background:#0a68e8;color:#fff;border-color:#0a68e8;box-shadow:0 3px 9px rgba(10,104,232,.18);}
+#hostBtn,#joinBtn{min-height:44px;padding:11px 18px;}
+#hostBtn{background:linear-gradient(135deg,#123b67,#0a68e8);}
+.color-row{display:flex;gap:8px;margin-bottom:14px;}
+.color-btn{flex:1;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--panel2);color:var(--text);font-weight:600;margin:0;}
+.color-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.status{font-size:.92rem;margin:8px 0;min-height:1.3em;}
+.hint{font-size:.78rem;color:var(--muted);}
+.code-badge{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1.05rem;letter-spacing:3px;background:var(--panel2);border:1px dashed var(--accent);padding:6px 11px;border-radius:8px;display:inline-block;}
+
+/* Full-screen game layout */
+.game-app{height:100dvh;width:100vw;display:grid;grid-template-rows:52px minmax(0,1fr);background:var(--bg);}
+.game-topbar{display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--border);background:var(--panel);z-index:20;}
+.brand{font-weight:900;letter-spacing:-.02em;display:flex;align-items:center;gap:8px;color:#09223d;}
+.brand-logo{width:40px;height:27px;object-fit:contain;display:block;}
+.brand-mark{display:none;}
+.brand-name{font-size:1.05rem;}
+.top-actions{display:flex;align-items:center;gap:7px;}
+.room-chip{font-size:.78rem;color:var(--muted);padding:6px 9px;border:1px solid var(--border);border-radius:7px;}
+.game-layout{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:12px;padding:8px;}
+.board-zone{min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+#board{width:min(100%,calc(100dvh - 70px));height:auto;max-width:100%;max-height:calc(100dvh - 70px);aspect-ratio:1/1;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);border-radius:2px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.28);touch-action:manipulation;flex:0 0 auto;}
+#board{position:relative;}
+#board .arrow-layer{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none;overflow:visible;}
+#board .arrow-line{fill:none;stroke-width:.16;stroke-linecap:round;stroke-linejoin:round;}
+#board .arrow-head{stroke:none;}
+#board .arrow-preview{opacity:.58;}
+#board .arrow-preview .arrow-line{stroke-dasharray:.18 .12;}
+#board .arrow-circle{fill:none;stroke-width:.085;opacity:.88;}
+#board.arrow-mode{cursor:crosshair;}
+#board.arrow-drawing{cursor:crosshair;}
+#board .sq{z-index:1;}
+
+.sq{display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;-webkit-user-select:none;position:relative;overflow:hidden;}
+.sq.light{background:var(--sq-light)} .sq.dark{background:var(--sq-dark)}
+.sq.sel{box-shadow:inset 0 0 0 4px rgba(246,211,101,.98);}
+.sq.move::after{content:'';position:absolute;width:24%;height:24%;border-radius:50%;background:rgba(54,100,48,.72);z-index:1;}
+.sq.move.capture::after{width:78%;height:78%;background:transparent;border:5px solid rgba(54,100,48,.72);border-radius:50%;}
+.piece{width:100%;height:100%;object-fit:contain;position:relative;z-index:2;pointer-events:none;padding:3%;}
+.piece-w,.piece-b{fill:initial;stroke:initial;}
+.coord{position:absolute;font-size:clamp(9px,1.15vw,14px);line-height:1;font-weight:700;z-index:4;opacity:.9;text-shadow:0 1px 1px rgba(255,255,255,.12);pointer-events:none;}
+.coord.rank{top:3px;right:4px}.coord.file{bottom:3px;left:4px}.light .coord{color:#a87851}.dark .coord{color:#f0d9b5}
+
+.side-panel{min-width:0;min-height:0;height:100%;max-height:100%;background:var(--panel);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 3px 18px rgba(0,0,0,.08);}
+.players-panel{padding:10px;border-bottom:1px solid var(--border);display:grid;gap:7px;}
+.player-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;padding:8px 9px;border-radius:8px;background:var(--panel2);border:1px solid transparent;}
+.player-row.active{border-color:var(--accent2);box-shadow:inset 3px 0 0 var(--accent2);}
+.player-name{font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.player-meta{font-size:.7rem;color:var(--muted);margin-top:2px;}
+.clock{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1.45rem;font-weight:800;letter-spacing:.02em;background:var(--clock);color:#fff;padding:5px 9px;border-radius:6px;min-width:92px;text-align:center;}
+.clock.low{background:var(--danger);}
+.game-info{padding:9px 10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.turn-label{font-size:.78rem;color:var(--muted)}
+.role-pill{font-size:.72rem;padding:4px 7px;border-radius:999px;background:var(--panel2);border:1px solid var(--border);}
+.result-line{padding:8px 10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:.78rem;}
+.result-line strong{font-size:1.05rem;font-weight:900;letter-spacing:.02em;}
+.notation-wrap{min-height:0;min-width:0;flex:1 1 auto;display:flex;flex-direction:column;overflow:hidden;}
+
+.notation-columns{display:grid;grid-template-columns:38px 1fr 1fr;gap:4px;padding:5px 8px;border-bottom:1px solid var(--border);font-size:.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+.notation{min-height:0;min-width:0;overflow-y:auto;overflow-x:hidden;padding:6px 8px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem;scrollbar-width:thin;scroll-behavior:smooth;}
+.notation::-webkit-scrollbar{width:8px;}
+.notation::-webkit-scrollbar-thumb{background:#b7c4d2;border-radius:8px;}
+.notation::-webkit-scrollbar-track{background:transparent;}
+.move-row{display:grid;grid-template-columns:38px 1fr 1fr;gap:4px;padding:5px 4px;border-radius:5px;}
+.move-row{cursor:pointer;user-select:none;}
+.move-row:hover{background:rgba(47,126,234,.08);}
+.move-row.review-current{background:rgba(47,126,234,.13);box-shadow:inset 3px 0 0 var(--accent2);}
+.move-cell.current{background:rgba(111,75,47,.13);border-radius:4px;padding:2px 4px;}
+.move-nav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:7px;}
+.move-nav button{width:100%;margin:0;padding:7px 5px;font-size:.74rem;}
+.move-nav button:disabled{opacity:.45;cursor:not-allowed;}
+.move-row:nth-child(odd){background:var(--panel2);}.move-no{color:var(--muted);cursor:pointer}.move-cell{font-weight:650;text-align:left;cursor:pointer;border-radius:4px;padding:2px 4px}.move-cell:hover{background:rgba(47,126,234,.10)}.move-cell.current{background:rgba(111,75,47,.13);border-radius:4px;padding:2px 4px;}
+.controls{padding:9px 10px;border-top:1px solid var(--border);background:var(--panel);flex:0 0 auto;}
+.control-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.control-grid button{width:100%;margin:0;padding:8px 7px;}
+.clock-tools{display:grid;grid-template-columns:1fr auto;gap:7px;align-items:center;margin-bottom:7px;}
+.clock-tools select{margin:0;padding:8px;font-size:.78rem;}
+.mini-status{font-size:.7rem;color:var(--muted);margin-top:6px;}
+.game-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px;}
+.game-actions button{width:100%;margin:0;padding:8px 7px;}
+.draw-offer{padding:7px 9px;border:1px solid var(--accent2);background:var(--panel2);border-radius:7px;font-size:.74rem;display:flex;justify-content:space-between;align-items:center;gap:7px;margin-top:7px;}
+.draw-offer .offer-buttons{display:flex;gap:5px;}
+.draw-offer button{margin:0;padding:5px 8px;font-size:.72rem;}
+.custom-clock{display:none;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px;}
+.custom-clock.show{display:grid;}
+.custom-clock input{margin:0;padding:7px 8px;font-size:.78rem;}
+
+.sq.last-from{box-shadow:inset 0 0 0 999px rgba(246,196,66,.22);}.sq.last-to{box-shadow:inset 0 0 0 999px rgba(246,196,66,.38);}
+.player-row.active .clock{box-shadow:0 0 0 2px rgba(47,126,234,.28);transform:scale(1.015);}.clock.low{animation:clockPulse 1s infinite;}.clock.urgent{animation:clockPulse .55s infinite;}
+@keyframes clockPulse{50%{filter:brightness(1.15);}}
+.connection-dot.reconnecting{background:#d17b19;box-shadow:0 0 0 4px rgba(209,123,25,.12);}
+.offer-card{padding:8px 9px;border:1px solid var(--accent2);background:var(--panel2);border-radius:8px;font-size:.74rem;display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:7px}.offer-card .offer-buttons{display:flex;gap:5px}.offer-card button{margin:0;padding:5px 8px;font-size:.72rem}
+@media(max-width:900px){
+  html,body{overflow:auto;}
+  .game-app{height:auto;min-height:100dvh;grid-template-rows:52px auto;}
+  .game-layout{grid-template-columns:1fr;gap:8px;padding:5px;}
+  .board-zone{min-height:auto;overflow:visible;}
+  #board{width:min(calc(100vw - 10px),calc(100dvh - 130px));height:auto;max-width:calc(100vw - 10px);max-height:calc(100dvh - 130px);aspect-ratio:1/1;}
+  .side-panel{min-height:0;height:auto;max-height:none;}
+}
+@media(max-width:520px){
+  .game-topbar{padding:0 8px}.brand-name{font-size:.9rem}.brand-logo{width:34px;height:23px}.room-chip{display:none}.top-actions button{width:34px;height:34px;}
+  .game-layout{padding:3px}.side-panel{border-radius:8px;min-height:0;height:auto;max-height:none;}.clock{font-size:1.2rem;min-width:78px}.player-row{padding:6px 7px;}
+  body:not(:has(.game-app)) .wrap{padding:12px}
+  body:not(:has(.game-app)) #content>.card{padding:24px 18px 20px;}
+  .lobby-brand-logo{width:175px;height:116px;}
+  .tabs{gap:5px;padding:4px;}
+  .tab{font-size:.86rem;padding:12px 6px;}
+  .brand-note{font-size:.78rem;}
+  .brand-note strong:first-child{font-size:.92rem;}
+  body:not(:has(.game-app)) .lobby-card{padding:22px 16px 18px;}
+  .lobby-brand-logo{width:155px;height:104px;}
+  .lobby-intro{margin-bottom:15px;}
+  .lobby-subtitle{font-size:.82rem;}
+  .lobby-section{padding:13px;}
+  .share-row{grid-template-columns:1fr;}
+  .share-row button{width:100%;}
+  .status-chip{font-size:.67rem;padding:4px 7px;}
+  .side-panel{display:flex;flex-direction:column;overflow:hidden;height:clamp(390px,60vh,560px);max-height:clamp(390px,60vh,560px);}
+  .notation-wrap{min-height:110px;overflow:hidden;}
+  .notation{min-height:0;overflow-y:auto;}
+  .controls{padding:7px 8px;}
+  .control-grid,.game-actions{gap:6px;}
+  .control-grid button,.game-actions button{padding:7px 6px;font-size:.82rem;}
+}
+
+/* Responsive landscape game mode: keep board + player clocks visible side-by-side when the browser is resized. */
+@media (min-width:721px) and (max-width:900px){
+  html,body{overflow:hidden;}
+  .game-app{height:100dvh;min-height:0;grid-template-rows:52px minmax(0,1fr);}
+  .game-layout{height:100%;min-height:0;grid-template-columns:minmax(0,1fr) 300px;gap:8px;padding:5px;}
+  .board-zone{min-width:0;min-height:0;height:100%;overflow:hidden;}
+  #board{width:min(100%,calc(100dvh - 65px));height:auto;max-width:100%;max-height:calc(100dvh - 65px);aspect-ratio:1/1;}
+  .side-panel{height:100%;max-height:100%;min-height:0;overflow:hidden;}
+  .players-panel{padding:7px;gap:5px;}
+  .player-row{padding:7px 8px;gap:6px;}
+  .player-name{font-size:.92rem;}
+  .player-meta{font-size:.64rem;}
+  .clock{font-size:1.18rem;min-width:78px;padding:6px 9px;}
+  .notation-wrap{min-height:0;flex:1 1 auto;overflow:hidden;}
+  .notation{min-height:0;overflow-y:auto;}
+  .controls{padding:7px 8px;}
+  .control-grid,.game-actions{gap:5px;}
+  .control-grid button,.game-actions button{padding:7px 5px;font-size:.78rem;}
+}
+
+/* =========================================================
+   MyChess64 Responsive Display V2
+   Priority: Chessboard + Player Names + Chess Clocks
+   Layout adapts by width AND orientation.
+   ========================================================= */
+
+/* Desktop / laptop landscape: board and player panel side-by-side. */
+@media (min-width:901px) and (orientation:landscape){
+  html,body{overflow:hidden;}
+  .game-app{height:100dvh;min-height:0;grid-template-rows:52px minmax(0,1fr);}
+  .game-layout{height:100%;min-height:0;grid-template-columns:minmax(0,1fr) clamp(300px,24vw,360px);gap:10px;padding:6px;}
+  .board-zone{height:100%;min-width:0;min-height:0;overflow:hidden;}
+  #board{width:min(100%,calc(100dvh - 64px));height:auto;max-width:100%;max-height:calc(100dvh - 64px);aspect-ratio:1/1;}
+  .side-panel{height:100%;max-height:100%;min-height:0;overflow:hidden;}
+  .players-panel{flex:0 0 auto;}
+  .notation-wrap{min-height:0;flex:1 1 auto;overflow:hidden;}
+  .notation{min-height:0;overflow-y:auto;}
+  .controls{flex:0 0 auto;}
+}
+
+/* Tablet / small laptop landscape: keep the full board beside names + clocks. */
+@media (min-width:721px) and (max-width:900px) and (orientation:landscape){
+  html,body{overflow:hidden;}
+  .game-app{height:100dvh;min-height:0;grid-template-rows:48px minmax(0,1fr);}
+  .game-topbar{padding:0 9px;}
+  .brand-logo{width:36px;height:24px;}
+  .brand-name{font-size:.96rem;}
+  .game-layout{height:100%;min-height:0;grid-template-columns:minmax(0,1fr) 285px;gap:7px;padding:5px;}
+  .board-zone{height:100%;min-width:0;min-height:0;overflow:hidden;}
+  #board{width:min(100%,calc(100dvh - 60px));height:auto;max-width:100%;max-height:calc(100dvh - 60px);aspect-ratio:1/1;}
+  .side-panel{height:100%;max-height:100%;min-height:0;overflow:hidden;}
+  .players-panel{padding:7px;gap:5px;flex:0 0 auto;}
+  .player-row{padding:7px 8px;gap:6px;}
+  .player-name{font-size:.92rem;}
+  .player-meta{font-size:.64rem;}
+  .clock{font-size:1.18rem;min-width:78px;padding:6px 8px;}
+  .notation-wrap{min-height:0;flex:1 1 auto;overflow:hidden;}
+  .notation{min-height:0;overflow-y:auto;}
+  .controls{padding:7px 8px;flex:0 0 auto;}
+}
+
+/* Mobile landscape: preserve the chessboard and BOTH player clocks side-by-side. */
+@media (max-width:720px) and (orientation:landscape){
+  html,body{overflow:hidden;}
+  .game-app{height:100dvh;min-height:0;grid-template-rows:46px minmax(0,1fr);}
+  .game-topbar{padding:0 7px;}
+  .brand-logo{width:32px;height:22px;}
+  .brand-name{font-size:.88rem;}
+  .room-chip{display:none;}
+  .top-actions{gap:4px;}
+  .top-actions button{width:34px;height:34px;}
+  .game-layout{height:100%;min-height:0;grid-template-columns:minmax(0,1fr) clamp(250px,34vw,285px);gap:5px;padding:4px;}
+  .board-zone{height:100%;min-width:0;min-height:0;overflow:hidden;}
+  #board{width:min(100%,calc(100dvh - 56px));height:auto;max-width:100%;max-height:calc(100dvh - 56px);aspect-ratio:1/1;}
+  .side-panel{height:100%;max-height:100%;min-height:0;overflow:hidden;border-radius:8px;}
+  .players-panel{padding:5px;gap:4px;flex:0 0 auto;}
+  .player-row{padding:5px 6px;gap:5px;}
+  .player-name{font-size:.78rem;}
+  .player-meta{font-size:.58rem;}
+  .clock{font-size:1.02rem;min-width:68px;padding:5px 6px;}
+  .notation-wrap{min-height:0;flex:1 1 auto;overflow:hidden;}
+  .notation-columns{padding:3px 5px;font-size:.58rem;}
+  .notation{padding:3px 5px;font-size:.68rem;}
+  .move-row{padding:3px 3px;}
+  .move-nav{gap:4px;margin:4px 5px 5px;}
+  .move-nav button{padding:5px 3px;font-size:.62rem;}
+  .controls{padding:5px;flex:0 0 auto;}
+  .clock-tools{gap:4px;margin-bottom:4px;}
+  .clock-tools select,.clock-tools button{padding:5px;font-size:.65rem;}
+  .control-grid,.game-actions{gap:4px;}
+  .control-grid button,.game-actions button{padding:5px 4px;font-size:.68rem;}
+}
+
+/* Tablet / mobile portrait: the board remains large, with both players + clocks
+   immediately below it. Notation and controls continue below and may scroll. */
+@media (max-width:900px) and (orientation:portrait){
+  html,body{overflow:auto;}
+  .game-app{height:auto;min-height:100dvh;grid-template-rows:48px auto;}
+  .game-topbar{padding:0 8px;}
+  .game-layout{height:auto;min-height:0;display:grid;grid-template-columns:1fr;gap:6px;padding:4px;}
+  .board-zone{height:auto;min-height:0;overflow:visible;}
+  #board{width:min(calc(100vw - 8px),calc(100dvh - 180px));height:auto;max-width:calc(100vw - 8px);max-height:calc(100dvh - 180px);aspect-ratio:1/1;}
+  .side-panel{height:auto;max-height:none;min-height:0;overflow:hidden;border-radius:8px;}
+  .players-panel{padding:7px;gap:5px;flex:0 0 auto;}
+  .player-row{padding:7px 8px;}
+  .clock{font-size:1.18rem;min-width:78px;}
+  .notation-wrap{height:clamp(150px,24vh,260px);min-height:150px;flex:0 0 auto;overflow:hidden;}
+  .notation{min-height:0;overflow-y:auto;}
+  .controls{flex:0 0 auto;}
+}
+
+/* Very small portrait phones: keep the board + player clocks comfortably visible. */
+@media (max-width:520px) and (orientation:portrait){
+  .game-app{grid-template-rows:44px auto;}
+  .game-topbar{padding:0 6px;}
+  .brand-logo{width:32px;height:22px;}
+  .brand-name{font-size:.88rem;}
+  .room-chip{display:none;}
+  .top-actions{gap:4px;}
+  .top-actions button{width:34px;height:34px;}
+  .game-layout{padding:3px;gap:5px;}
+  #board{width:min(calc(100vw - 6px),calc(100dvh - 165px));height:auto;max-width:calc(100vw - 6px);max-height:calc(100dvh - 165px);aspect-ratio:1/1;}
+  .players-panel{padding:6px;gap:4px;}
+  .player-row{padding:6px 7px;gap:6px;}
+  .player-name{font-size:.88rem;}
+  .player-meta{font-size:.62rem;}
+  .clock{font-size:1.12rem;min-width:76px;padding:5px 8px;}
+}
+
+/* MyChess64 PLAY CHESS V2 corrections */
+html,body{overflow:hidden} body{margin:0}
+.home-screen,.setup-screen{height:100%;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px}
+.home-card,.setup-card{width:min(760px,100%);background:var(--panel);border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 28px rgba(0,0,0,.10);padding:28px}
+.home-card{text-align:center}.home-title{font-size:clamp(30px,5vw,48px);font-weight:900;letter-spacing:-1px}.home-sub{color:var(--muted);margin:8px 0 26px}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.mode-card{border:1px solid var(--border);background:var(--panel2);color:var(--text);border-radius:12px;padding:22px;text-align:left;transition:.15s}.mode-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.mode-icon{font-size:34px;margin-bottom:10px}.mode-card h2{font-size:18px;margin:0 0 6px}.mode-card p{font-size:12px;color:var(--muted);margin:0;line-height:1.5}.home-note{margin-top:20px;color:var(--muted);font-size:11px}
+.setup-card{width:min(520px,100%)}.setup-title{font-size:24px;font-weight:900}.setup-sub{font-size:12px;color:var(--muted);margin:4px 0 18px}.field{margin:13px 0}.field label{display:block;font-size:11px;font-weight:800;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+.pc-select{width:100%;height:42px;border:1px solid var(--border);border-radius:8px;background:var(--panel2);color:var(--text);padding:0 10px;outline:none}.level-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.level-btn{height:38px;border:1px solid var(--border);border-radius:7px;background:var(--panel2);color:var(--text);font-weight:800}.level-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.setup-actions{display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:18px}.setup-actions button{padding:9px;border-radius:8px;border:1px solid var(--border);font-weight:800}.setup-actions .start{background:var(--accent);color:#fff;border-color:var(--accent)}
+.engine-note{margin-top:10px;padding:9px 10px;border-radius:8px;background:var(--panel2);color:var(--muted);font-size:10px;line-height:1.45}
+.game-status-card{padding:8px 10px;border-bottom:1px solid var(--border)}.game-status-main{font-weight:900;font-size:.88rem}.game-status-sub{font-size:.68rem;color:var(--muted);margin-top:2px}.engine-status{font-size:.66rem;color:var(--muted);padding:4px 2px;text-align:center;min-height:16px}
+.live-pill{font-size:.66rem;padding:3px 7px;border-radius:999px;border:1px solid var(--border);color:var(--muted)}.live-pill.review{color:var(--accent);border-color:var(--accent)}
+.clock-tools{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;margin-bottom:7px}.clock-tools select{margin:0;padding:7px;font-size:.75rem}.clock-tools button{padding:7px 9px}
+.player-row.active-turn{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}.player-row .clock.off{opacity:.45}.result-line.result-show{display:flex}.result-line{display:none}.move-row.current{background:rgba(47,126,234,.12);box-shadow:inset 3px 0 0 var(--accent2)}.move-cell.current{background:rgba(111,75,47,.13);border-radius:4px;padding:2px 4px}
+.promotion-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}.promotion-btn{height:62px;border:1px solid var(--border);background:var(--panel2);border-radius:8px}.promotion-btn img{width:48px;height:48px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}.modal.show{display:flex}.modal-card{width:min(400px,100%);background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.22)}.modal-title{font-size:18px;font-weight:900}.modal-text{font-size:12px;color:var(--muted);line-height:1.5;margin-top:7px}.modal-actions{display:flex;gap:7px;margin-top:16px}.modal-actions button{flex:1;padding:8px;border-radius:7px;border:1px solid var(--border);font-weight:800}.modal-actions .ok{background:var(--accent);color:#fff;border-color:var(--accent)}
+.board-piece{width:100%;height:100%;object-fit:contain;padding:2%;position:relative;z-index:2;pointer-events:none;user-select:none;-webkit-user-drag:none}.sq{position:relative}.sq.check-square{box-shadow:inset 0 0 0 5px rgba(211,74,74,.82)}.sq.last-from,.sq.last-to{background-image:linear-gradient(rgba(246,211,101,.30),rgba(246,211,101,.30))}.sq.sel{box-shadow:inset 0 0 0 4px rgba(246,211,101,.98)}.sq.move::after{z-index:3}.coord{z-index:4}
+@media(max-width:900px) and (orientation:portrait){html,body{overflow:auto}.game-app{height:auto;min-height:100dvh;grid-template-rows:48px auto}.game-layout{height:auto;min-height:0;display:grid;grid-template-columns:1fr;gap:6px;padding:4px}.board-zone{height:auto;overflow:hidden}#board{width:min(calc(100vw - 8px),calc(100dvh - 180px));height:auto;max-width:calc(100vw - 8px);max-height:none}.side-panel{height:auto;max-height:none;overflow:hidden}.notation-wrap{height:clamp(150px,24vh,260px);min-height:150px;flex:0 0 auto}}
+@media(max-width:560px){.mode-grid{grid-template-columns:1fr}.home-card,.setup-card{padding:18px}.home-title{font-size:30px}.setup-actions{grid-template-columns:1fr 1.7fr}.clock{font-size:1.15rem;min-width:78px}.move-nav button,.control-grid button,.game-actions button{padding:7px 5px;font-size:.72rem}}
+
+
+/* V3 FIDE + game-control corrections */
+.draw-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}.draw-actions button{width:100%;margin:0;padding:8px 7px}.draw-actions button:disabled{opacity:.45;cursor:not-allowed}.fide-note{font-size:.62rem;color:var(--muted);text-align:center;margin-top:4px}.engine-status.ready{color:var(--accent2);font-weight:800}.engine-status.error{color:var(--danger);font-weight:800}.board-legal-badge{font-size:.62rem;color:var(--muted);text-align:center;margin-top:2px}.draw-pending{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section id="homeScreen" class="home-screen"><div class="home-card">
+<div class="home-title">MYCHESS64</div><div class="home-sub">PLAY CHESS</div>
+<div class="mode-grid">
+<button class="mode-card" id="computerBtn"><div class="mode-icon">♟</div><h2>Play with Computer</h2><p>Play against Stockfish — Level 1 to Level 10.</p></button>
+<button class="mode-card" id="friendBtn"><div class="mode-icon">♟♟</div><h2>Play with Friend</h2><p>Two players • Same device • No online connection.</p></button>
+</div><div class="home-note">Simple to start • Easy to play • Ready to grow</div>
+</div></section>
+
+<section id="setupScreen" class="setup-screen" style="display:none"><div class="setup-card">
+<div class="setup-title" id="setupTitle">Play with Computer</div><div class="setup-sub" id="setupSub"></div>
+<div class="field"><label>Color</label><select id="colorSelect" class="pc-select"><option value="w">White</option><option value="b">Black</option><option value="random">Random Color</option></select></div>
+<div class="field" id="levelField"><label>Stockfish Level</label><div class="level-grid" id="levelGrid"></div></div>
+<div class="field"><label>Chess Clock</label><select id="setupClock" class="pc-select"></select></div>
+<div class="setup-actions"><button id="backBtn">Back</button><button id="startBtn" class="start">Start Game</button></div>
+<div class="engine-note" id="engineNote">Stockfish loads only when Computer mode starts. This version uses the JS-only Stockfish 19 browser fallback, so no WASM file is required.</div>
+</div></section>
+
+<section id="gameScreen" class="game-app" style="display:none">
+<header class="game-topbar"><div class="brand"><div class="brand-mark">♞</div><div class="brand-title"><div class="brand-name">MYCHESS64</div><div class="brand-sub">PLAY CHESS</div></div></div><div class="top-actions"><span class="live-pill" id="modePill">LOCAL</span><button class="ghost" id="themeBtn" title="Toggle theme">☾</button><button class="ghost" id="homeGameBtn">Home</button></div></header>
+<div class="game-layout"><div class="board-zone"><div id="board"></div></div>
+<aside class="side-panel">
+<div class="players-panel">
+<div class="player-row" id="blackRow"><div><div class="player-name" id="blackName">Black</div><div class="player-meta">BLACK</div></div><div class="clock off" id="blackClock">--:--</div></div>
+<div class="player-row" id="whiteRow"><div><div class="player-name" id="whiteName">White</div><div class="player-meta">WHITE</div></div><div class="clock off" id="whiteClock">--:--</div></div>
+</div>
+<div class="game-status-card"><div class="game-status-main" id="statusMain">White to Move</div><div class="game-status-sub" id="statusSub">Game ready</div></div>
+<div class="result-line" id="resultLine"><strong id="resultText"></strong><span id="resultReason"></span></div>
+<div class="notation-wrap"><div class="notation-columns"><div>#</div><div>White</div><div>Black</div></div><div class="notation" id="notation"></div></div>
+<div class="controls">
+<div class="move-nav"><button class="ghost" id="navStart">⏮ Start</button><button class="ghost" id="navPrev">◀ Previous</button><button class="ghost" id="navNext">Next ▶</button><button class="ghost" id="navLast">Last ⏭</button></div>
+<div style="display:flex;justify-content:center;margin:-2px 0 6px"><span class="live-pill" id="livePill">LIVE</span></div>
+<div class="clock-tools"><select id="gameClockSelect" class="ghost"></select><button class="ghost" id="clockApply">Next Game</button></div>
+<div class="control-grid"><button class="ghost" id="takebackBtn">↶ Takeback</button><button class="ghost" id="flipBtn">Flip Board</button></div>
+<div class="draw-actions"><button class="ghost" id="drawBtn">Offer Draw</button><button class="ghost" id="newGameBtn">New Game</button></div>
+<div class="game-actions"><button class="ghost danger" id="resignBtn">Resign</button><button class="ghost" id="homeBtn">Home</button></div>
+<div class="fide-note">Board orientation and legal moves follow FIDE board conventions.</div>
+<div class="engine-status" id="engineStatus"></div>
+</div></aside></div></section>
+</div>
+<div class="modal" id="modal"><div class="modal-card"><div class="modal-title" id="modalTitle"></div><div class="modal-text" id="modalText"></div><div class="modal-actions"><button id="modalCancel">Cancel</button><button id="modalOk" class="ok">OK</button></div></div></div>
+<div class="modal" id="promotionModal"><div class="modal-card"><div class="modal-title">Choose Promotion</div><div class="modal-text">Select the piece for your pawn.</div><div class="promotion-grid" id="promotionGrid"></div></div></div>
+<div class="modal" id="drawModal"><div class="modal-card"><div class="modal-title">Draw Offer</div><div class="modal-text" id="drawModalText"></div><div class="modal-actions"><button id="drawDecline">Decline</button><button id="drawAccept" class="ok">Accept Draw</button></div></div></div>
+<script>
+"use strict";
+const $=id=>document.getElementById(id),FILES="abcdefgh",PIECE_URL="https://lichess1.org/assets/piece/cburnett/";
+/* JS-only engine: no WASM download. Loaded lazily only for Computer mode. */
+const ENGINE_URLS=["./engine/stockfish-worker.js"];
+const CLOCKS={off:{label:"No Clock",base:0,inc:0},"1+0":{label:"1+0",base:60,inc:0},"2+1":{label:"2+1",base:120,inc:1},"3+0":{label:"3+0",base:180,inc:0},"3+2":{label:"3+2",base:180,inc:2},"5+0":{label:"5+0",base:300,inc:0},"5+3":{label:"5+3",base:300,inc:3},"10+0":{label:"10+0",base:600,inc:0},"10+5":{label:"10+5",base:600,inc:5},"15+10":{label:"15+10",base:900,inc:10},"30+0":{label:"30+0",base:1800,inc:0},"30+20":{label:"30+20",base:1800,inc:20},"60+0":{label:"60+0",base:3600,inc:0},"90+30":{label:"90+30",base:5400,inc:30}};
+/* MyChess64 difficulty levels. These are product levels, not FIDE ratings. */
+const LEVELS={1:{elo:1320,depth:8},2:{elo:1450,depth:9},3:{elo:1600,depth:10},4:{elo:1750,depth:11},5:{elo:1900,depth:12},6:{elo:2100,depth:13},7:{elo:2300,depth:14},8:{elo:2500,depth:15},9:{elo:2750,depth:16},10:{elo:3000,depth:17}};
+const S={mode:"friend",humanColor:"w",engineColor:"b",level:5,clockKey:"off",nextClockKey:"off",clockBase:0,clockInc:0,whiteMs:0,blackMs:0,clockTimer:null,clockLast:0,clockActive:null,game:null,history:[],viewPly:0,orientation:"w",selected:null,targets:{},lastMove:null,lastMover:null,gameOver:false,drawOffer:null,engine:null,engineReady:false,engineBusy:false,engineStarting:false,enginePromise:null,engineSession:0,engineUrlIndex:0,pendingPromotion:null};
+let modalOK=null;
+function loadTheme(){if(localStorage.getItem("mychess64-theme")==="dark")document.body.classList.add("dark-theme")}loadTheme();
+$("themeBtn").onclick=()=>{document.body.classList.toggle("dark-theme");localStorage.setItem("mychess64-theme",document.body.classList.contains("dark-theme")?"dark":"light")};
+function fillClock(el){el.innerHTML="";Object.keys(CLOCKS).forEach(k=>{const o=document.createElement("option");o.value=k;o.textContent=CLOCKS[k].label;el.appendChild(o)})}fillClock($("setupClock"));fillClock($("gameClockSelect"));
+for(let i=1;i<=10;i++){const b=document.createElement("button");b.className="level-btn"+(i===S.level?" active":"");b.textContent=i;b.onclick=()=>{S.level=i;document.querySelectorAll(".level-btn").forEach(x=>x.classList.remove("active"));b.classList.add("active")};$("levelGrid").appendChild(b)}
+function showHome(){stopClock();stopEngine();S.gameOver=true;$("gameScreen").style.display="none";$("setupScreen").style.display="none";$("homeScreen").style.display="flex"}
+function showSetup(mode){stopClock();stopEngine();S.mode=mode;$("homeScreen").style.display="none";$("gameScreen").style.display="none";$("setupScreen").style.display="flex";$("setupTitle").textContent=mode==="computer"?"Play with Computer":"Play with Friend";$("setupSub").textContent=mode==="computer"?"Choose your side, Stockfish level and optional clock.":"Choose colors and an optional chess clock.";$("levelField").style.display=mode==="computer"?"block":"none";$("engineNote").style.display=mode==="computer"?"block":"none";$("colorSelect").value="w";$("setupClock").value=S.nextClockKey||"off"}
+$("computerBtn").onclick=()=>showSetup("computer");$("friendBtn").onclick=()=>showSetup("friend");$("backBtn").onclick=showHome;
+$("startBtn").onclick=()=>{let c=$("colorSelect").value;if(c==="random")c=Math.random()<.5?"w":"b";S.humanColor=c;S.engineColor=c==="w"?"b":"w";S.clockKey=$("setupClock").value;S.nextClockKey=S.clockKey;startNewGame()};
+function startNewGame(){
+  stopClock();stopEngine();
+  S.engineSession++;
+  S.game=new Chess();S.history=[];S.viewPly=0;
+  /* FIDE display convention: the player's own side is at the bottom. */
+  S.orientation=S.mode==="computer"?S.humanColor:"w";
+  S.selected=null;S.targets={};S.lastMove=null;S.lastMover=null;S.gameOver=false;S.drawOffer=null;S.pendingPromotion=null;
+  const c=CLOCKS[S.clockKey]||CLOCKS.off;S.clockBase=c.base;S.clockInc=c.inc;S.whiteMs=c.base*1000;S.blackMs=c.base*1000;
+  $("whiteName").textContent=S.mode==="computer"?(S.humanColor==="w"?"You":"Stockfish"):"Player 1";
+  $("blackName").textContent=S.mode==="computer"?(S.humanColor==="b"?"You":"Stockfish"):"Player 2";
+  $("modePill").textContent=S.mode==="computer"?"COMPUTER":"FRIEND";
+  $("gameClockSelect").value=S.clockKey;
+  $("resultLine").classList.remove("result-show");
+  $("engineStatus").className="engine-status";
+  $("engineStatus").textContent=S.mode==="computer"?"Loading Stockfish…":"Local game ready";
+  $("homeScreen").style.display="none";$("setupScreen").style.display="none";$("gameScreen").style.display="grid";
+  renderAll();updateActionButtons();
+  if(S.mode!=="computer") { if(S.clockBase>0)startClock("w"); return; }
+  /* Do not start the clock until the engine has passed UCI + isready. */
+  ensureEngine().then(()=>{
+    if(S.gameOver||S.engineSession<=0)return;
+    $("engineStatus").className="engine-status ready";$("engineStatus").textContent="Stockfish ready";
+    if(S.clockBase>0)startClock(S.game.turn());
+    if(S.game.turn()===S.engineColor)requestEngineMove();
+  }).catch(err=>{
+    $("engineStatus").className="engine-status error";$("engineStatus").textContent="Stockfish failed to start";
+    stopClock();
+    showModal("Stockfish unavailable","Stockfish could not pass the engine startup test. Press OK to retry or Cancel to return to setup.",()=>{startNewGame()});
+  });
+}
+function boardGame(ply){const g=new Chess();for(let i=0;i<ply;i++){const h=S.history[i];g.move({from:h.from,to:h.to,promotion:h.promotion||"q"})}return g}
+function kingSquare(g,color){for(const r of [1,2,3,4,5,6,7,8])for(const f of FILES){const p=g.get(f+r);if(p&&p.color===color&&p.type==="k")return f+r}return null}
+function squareClass(rank,fi){/* FIDE: a1 is dark; h1 is light. */return ((rank+fi)%2===1)?"dark":"light"}
+function renderBoard(){
+  const g=S.viewPly===S.history.length?S.game:boardGame(S.viewPly),live=S.viewPly===S.history.length,b=$("board");b.innerHTML="";
+  const ranks=S.orientation==="w"?[8,7,6,5,4,3,2,1]:[1,2,3,4,5,6,7,8],files=S.orientation==="w"?[0,1,2,3,4,5,6,7]:[7,6,5,4,3,2,1,0];
+  for(let r=0;r<8;r++)for(let f=0;f<8;f++){
+    const rank=ranks[r],fi=files[f],sq=FILES[fi]+rank,p=g.get(sq),d=document.createElement("div");d.className="sq "+squareClass(rank,fi);
+    if(live&&S.lastMove&&(S.lastMove.from===sq||S.lastMove.to===sq))d.classList.add(S.lastMove.from===sq?"last-from":"last-to");
+    if(live&&S.selected===sq)d.classList.add("sel");
+    if(live&&S.targets[sq])d.classList.add(S.targets[sq].captured?"move capture":"move");
+    if(g.in_check()&&kingSquare(g,g.turn())===sq)d.classList.add("check-square");
+    if(r===7){const c=document.createElement("span");c.className="coord file";c.textContent=FILES[fi];d.appendChild(c)}
+    if(f===7){const c=document.createElement("span");c.className="coord rank";c.textContent=rank;d.appendChild(c)}
+    if(p){const img=document.createElement("img");img.className="board-piece";img.src=PIECE_URL+p.color+p.type.toUpperCase()+".svg";img.alt="";img.draggable=false;d.appendChild(img)}
+    d.onpointerdown=e=>{e.preventDefault();if(live)onSquare(sq)};b.appendChild(d)
+  }
+  $("livePill").textContent=live?"LIVE":"REVIEW";$("livePill").classList.toggle("review",!live);
+}
+function onSquare(sq){if(S.gameOver||S.viewPly!==S.history.length||(S.mode==="computer"&&(S.game.turn()!==S.humanColor||S.engineBusy)))return;const p=S.game.get(sq);if(S.selected){const m=S.targets[sq];if(m){if(m.piece==="p"&&(sq[1]==="8"||sq[1]==="1"))openPromotion(S.selected,sq);else playMove(S.selected,sq,m.promotion||"q");return}if(p&&p.color===S.game.turn()){selectSquare(sq);return}S.selected=null;S.targets={};renderBoard();return}if(p&&p.color===S.game.turn())selectSquare(sq)}
+function selectSquare(sq){S.selected=sq;S.targets={};S.game.moves({square:sq,verbose:true}).forEach(m=>S.targets[m.to]=m);renderBoard()}
+function playMove(from,to,promotion){
+  if(S.gameOver||S.viewPly!==S.history.length)return false;
+  const color=S.game.turn(),beforeFen=S.game.fen(),beforeW=S.whiteMs,beforeB=S.blackMs;
+  const m=S.game.move({from,to,promotion});if(!m)return false;
+  if(S.clockBase>0&&S.clockActive===color)S[color==="w"?"whiteMs":"blackMs"]+=S.clockInc*1000;
+  const afterFen=S.game.fen();
+  S.history.push({from:m.from,to:m.to,san:m.san,promotion:m.promotion||null,color,fen:afterFen,beforeFen,beforeWhiteMs:beforeW,beforeBlackMs:beforeB,afterWhiteMs:S.whiteMs,afterBlackMs:S.blackMs});
+  S.viewPly=S.history.length;S.lastMove={from:m.from,to:m.to};S.lastMover=color;S.selected=null;S.targets={};S.drawOffer=null;
+  renderAll();updateActionButtons();
+  if(S.game.game_over()){finishGame();return true}
+  if(S.clockBase>0)startClock(S.game.turn());
+  if(S.mode==="computer"&&S.game.turn()===S.engineColor)requestEngineMove();
+  return true;
+}
+function openPromotion(from,to){S.pendingPromotion={from,to};const box=$("promotionGrid");box.innerHTML="";["q","r","b","n"].forEach(t=>{const b=document.createElement("button");b.className="promotion-btn";const i=document.createElement("img");i.src=PIECE_URL+S.game.turn()+t.toUpperCase()+".svg";b.appendChild(i);b.onclick=()=>{const p=S.pendingPromotion;S.pendingPromotion=null;$("promotionModal").classList.remove("show");playMove(p.from,p.to,t)};box.appendChild(b)});$("promotionModal").classList.add("show")}
+function renderStatus(){if(!S.game)return;const side=S.game.turn()==="w"?"White":"Black";$("statusMain").textContent=S.gameOver?$("resultText").textContent:side+(S.game.in_check()?" in Check":" to Move");$("statusSub").textContent=S.gameOver?$("resultReason").textContent:(S.mode==="computer"?"Stockfish Level "+S.level:"Same Device");$("whiteRow").classList.toggle("active-turn",S.game.turn()==="w"&&!S.gameOver&&S.viewPly===S.history.length);$("blackRow").classList.toggle("active-turn",S.game.turn()==="b"&&!S.gameOver&&S.viewPly===S.history.length)}
+function renderNotation(){const n=$("notation");n.innerHTML="";if(!S.history.length){n.innerHTML='<div style="color:var(--muted);padding:8px">No moves yet.</div>';return}for(let i=0;i<S.history.length;i+=2){const row=document.createElement("div");row.className="move-row";if(S.viewPly>=i+1&&S.viewPly<=i+2)row.classList.add("current");const no=document.createElement("div");no.className="move-no";no.textContent=(i/2+1)+".";const w=document.createElement("div");w.className="move-cell";w.textContent=S.history[i]?.san||"";if(S.viewPly===i+1)w.classList.add("current");const bl=document.createElement("div");bl.className="move-cell";bl.textContent=S.history[i+1]?.san||"";if(S.viewPly===i+2)bl.classList.add("current");row.append(no,w,bl);row.onclick=()=>goToPly(S.viewPly===i+1?i+2:i+1);n.appendChild(row)}const c=n.querySelector(".current");if(c)requestAnimationFrame(()=>c.scrollIntoView({block:"nearest"}))}
+function renderAll(){renderBoard();renderNotation();renderStatus();updateClocks()}
+function goToPly(p){if(p<0||p>S.history.length)return;if(S.engineBusy)stopEngine();stopClock();S.viewPly=p;S.selected=null;S.targets={};renderAll();updateActionButtons();if(p!==S.history.length){$("statusMain").textContent="Move "+p+" / "+S.history.length;$("statusSub").textContent="Review mode — use Last to return to live";return}if(!S.gameOver){if(S.clockBase>0)startClock(S.game.turn());if(S.mode==="computer"&&S.game.turn()===S.engineColor)requestEngineMove()}}
+$("navStart").onclick=()=>goToPly(0);$("navPrev").onclick=()=>goToPly(Math.max(0,S.viewPly-1));$("navNext").onclick=()=>goToPly(Math.min(S.history.length,S.viewPly+1));$("navLast").onclick=()=>{S.viewPly=S.history.length;S.selected=null;S.targets={};renderAll();updateActionButtons();if(!S.gameOver&&S.clockBase>0)startClock(S.game.turn());if(S.mode==="computer"&&S.game.turn()===S.engineColor&&!S.engineBusy)requestEngineMove()};
+function startClock(side){stopClock();if(!S.clockBase||S.gameOver||S.viewPly!==S.history.length)return;S.clockActive=side;S.clockLast=performance.now();S.clockTimer=setInterval(()=>{if(!S.game||S.gameOver||S.viewPly!==S.history.length){stopClock();return}const now=performance.now(),d=now-S.clockLast;S.clockLast=now;const k=side==="w"?"whiteMs":"blackMs";S[k]=Math.max(0,S[k]-d);updateClocks();if(S[k]<=0){stopClock();finishCustom(side==="w"?"Black Wins":"White Wins",side==="w"?"White ran out of time":"Black ran out of time")}},100)}
+function stopClock(){if(S.clockTimer){clearInterval(S.clockTimer);S.clockTimer=null}S.clockActive=null}
+function fmt(ms){const t=Math.max(0,Math.ceil(ms/1000)),m=Math.floor(t/60),s=t%60;return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
+function updateClocks(){const on=S.clockBase>0;$("whiteClock").classList.toggle("off",!on);$("blackClock").classList.toggle("off",!on);$("whiteClock").textContent=on?fmt(S.whiteMs):"--:--";$("blackClock").textContent=on?fmt(S.blackMs):"--:--"}
+function finishGame(){let title="Game Over",reason="Game finished";if(S.game.in_checkmate()){title=(S.game.turn()==="w"?"Black":"White")+" Wins";reason="Checkmate"}else if(S.game.in_stalemate()){title="Draw";reason="Stalemate"}else if(typeof S.game.insufficient_material==="function"&&S.game.insufficient_material()){title="Draw";reason="Insufficient material"}else if(typeof S.game.in_threefold_repetition==="function"&&S.game.in_threefold_repetition()){title="Draw";reason="Threefold repetition"}else if(S.game.in_draw()){title="Draw";reason="Draw"}finishCustom(title,reason)}
+function finishCustom(t,r){stopClock();stopEngine();S.gameOver=true;S.drawOffer=null;$("resultText").textContent=t;$("resultReason").textContent=r;$("resultLine").classList.add("result-show");$("statusMain").textContent=t;$("statusSub").textContent=r;$("whiteRow").classList.remove("active-turn");$("blackRow").classList.remove("active-turn");$("engineStatus").textContent="Game over";updateActionButtons()}
+function currentPlayerName(color){return color==="w"?$("whiteName").textContent:$("blackName").textContent}
+function canOfferDraw(){return S.mode==="friend"&&!S.gameOver&&S.viewPly===S.history.length&&S.history.length>0&&!S.drawOffer}
+function offerDraw(){if(!canOfferDraw())return;S.drawOffer=S.lastMover;updateActionButtons();showDrawOfferToOpponent(S.drawOffer)}
+function showDrawOfferToOpponent(offeringColor){$("drawModalText").textContent=currentPlayerName(offeringColor)+" offers a draw.";$("drawModal").classList.add("show")}
+$("drawAccept").onclick=()=>{$("drawModal").classList.remove("show");if(S.drawOffer)finishCustom("Draw","Draw by agreement");S.drawOffer=null;updateActionButtons()};
+$("drawDecline").onclick=()=>{$("drawModal").classList.remove("show");S.drawOffer=null;$("engineStatus").textContent="Draw offer declined";updateActionButtons()};
+$("drawBtn").onclick=offerDraw;
+function takeback(){if(S.gameOver||!S.history.length||S.viewPly!==S.history.length)return;stopClock();if(S.engineBusy)stopEngine();let count=S.mode==="computer"?Math.min(2,S.history.length):1;let target=S.history.length-count;if(target<0)target=0;const snap=target===0?null:S.history[target];S.history.splice(target,count);S.game=new Chess();for(const h of S.history)S.game.move({from:h.from,to:h.to,promotion:h.promotion||"q"});if(snap){S.whiteMs=snap.afterWhiteMs;S.blackMs=snap.afterBlackMs}else{const c=CLOCKS[S.clockKey]||CLOCKS.off;S.whiteMs=c.base*1000;S.blackMs=c.base*1000}S.viewPly=S.history.length;S.lastMove=S.history.length?{from:S.history[S.history.length-1].from,to:S.history[S.history.length-1].to}:null;S.lastMover=S.history.length?S.history[S.history.length-1].color:null;S.selected=null;S.targets={};S.drawOffer=null;S.gameOver=false;S.engineSession++;renderAll();updateActionButtons();if(S.clockBase>0)startClock(S.game.turn());if(S.mode==="computer"&&S.game.turn()===S.engineColor)requestEngineMove()}
+$("takebackBtn").onclick=takeback;
+$("resignBtn").onclick=()=>{if(!S.gameOver){const side=S.game.turn()==="w"?"White":"Black";showModal("Resign Game",side+" to move. Confirm resignation?",()=>finishCustom((side==="White"?"Black":"White")+" Wins",side+" resigned"))}};
+$("newGameBtn").onclick=()=>showModal("New Game","Start a new game with the current mode and setup?",startNewGame);
+$("homeBtn").onclick=()=>showModal("Return Home","Leave the current game?",showHome);$("homeGameBtn").onclick=showHome;
+$("flipBtn").onclick=()=>{S.orientation=S.orientation==="w"?"b":"w";renderBoard()};
+$("clockApply").onclick=()=>{S.nextClockKey=$("gameClockSelect").value;$("engineStatus").textContent="Clock " + CLOCKS[S.nextClockKey].label + " selected for the next game."};
+function updateActionButtons(){const live=S.viewPly===S.history.length&&!S.gameOver;$("takebackBtn").disabled=!live||!S.history.length;$("drawBtn").disabled=!canOfferDraw();if(S.mode!=="friend")$("drawBtn").style.display="none";else $("drawBtn").style.display="block";if(S.drawOffer){$("drawBtn").textContent="Draw Offered";$("drawBtn").classList.add("draw-pending")}else{$("drawBtn").textContent="Offer Draw";$("drawBtn").classList.remove("draw-pending")}}
+function showModal(t,x,ok){$("modalTitle").textContent=t;$("modalText").textContent=x||"";modalOK=ok;$("modal").classList.add("show")}
+$("modalCancel").onclick=()=>{$("modal").classList.remove("show");modalOK=null};$("modalOk").onclick=()=>{const f=modalOK;$("modal").classList.remove("show");modalOK=null;if(f)f()};
+function stopEngine(){
+  S.engineSession++;
+  if(S.engine){const w=S.engine;try{w.postMessage("stop")}catch(e){}try{w.terminate()}catch(e){}}
+  S.engine=null;S.engineReady=false;S.engineBusy=false;S.engineStarting=false;S.enginePromise=null;
+}
+function ensureEngine(){
+  if(S.engineReady&&S.engine)return Promise.resolve();
+  if(S.enginePromise)return S.enginePromise;
+  S.engineStarting=true;
+  $("engineStatus").className="engine-status";
+  $("engineStatus").textContent="Loading Stockfish…";
+  const session=S.engineSession;
+  S.enginePromise=new Promise((resolve,reject)=>{
+    let settled=false,timer=null;
+    const finishFail=err=>{
+      if(settled)return;
+      settled=true;clearTimeout(timer);S.engineStarting=false;S.enginePromise=null;S.engineReady=false;
+      if(S.engine){try{S.engine.terminate()}catch(e){}}
+      S.engine=null;reject(err||new Error("Stockfish unavailable"));
+    };
+    try{
+      /* IMPORTANT: Worker itself is same-origin on GitHub Pages.
+         It imports the known browser-compatible Stockfish 10 worker build. */
+      const w=new Worker(ENGINE_URLS[0]);
+      S.engine=w;
+      timer=setTimeout(()=>finishFail(new Error("Stockfish startup timeout")),20000);
+      w.onerror=()=>finishFail(new Error("Stockfish worker error"));
+      w.onmessage=e=>{
+        const line=String(e.data||"").trim();
+        if(line==="uciok"){
+          if(session!==S.engineSession)return;
+          try{w.postMessage("isready")}catch(err){finishFail(err)}
+          return;
+        }
+        if(line==="readyok"){
+          if(session!==S.engineSession){try{w.terminate()}catch(x){};return}
+          settled=true;clearTimeout(timer);S.engineStarting=false;S.engineReady=true;S.enginePromise=null;
+          $("engineStatus").className="engine-status ready";
+          $("engineStatus").textContent="Stockfish ready";
+          resolve();return;
+        }
+        if(line.startsWith("bestmove")){
+          const uci=line.split(/\s+/)[1];
+          const sid=session;
+          S.engineBusy=false;
+          if(uci&&uci!=="(none)"&&uci!=="0000"&&sid===S.engineSession)applyEngineMove(uci,sid);
+        }
+      };
+      w.postMessage("uci");
+    }catch(err){finishFail(err)}
+  });
+  return S.enginePromise;
+}
+function requestEngineMove(){
+  if(S.mode!=="computer"||S.gameOver||S.viewPly!==S.history.length||S.game.turn()!==S.engineColor||S.engineBusy)return;
+  const sid=S.engineSession;
+  ensureEngine().then(()=>{
+    if(sid!==S.engineSession||S.gameOver||S.game.turn()!==S.engineColor||!S.engine)return;
+    S.engineBusy=true;
+    $("engineStatus").className="engine-status";
+    $("engineStatus").textContent="Stockfish is thinking…";
+    const L=LEVELS[S.level]||LEVELS[5];
+    try{
+      S.engine.postMessage("stop");
+      /* Stockfish 10 supports Skill Level; avoid UCI_Elo here because this
+         older browser build does not guarantee UCI_LimitStrength support. */
+      S.engine.postMessage("setoption name Skill Level value "+Math.min(20,Math.max(0,Math.round((S.level-1)*20/9))));
+      S.engine.postMessage("ucinewgame");
+      S.engine.postMessage("position fen "+S.game.fen());
+      S.engine.postMessage("go depth "+L.depth);
+    }catch(e){
+      S.engineBusy=false;
+      $("engineStatus").className="engine-status error";
+      $("engineStatus").textContent="Stockfish command error";
+    }
+  }).catch(()=>{
+    S.engineBusy=false;
+    $("engineStatus").className="engine-status error";
+    $("engineStatus").textContent="Stockfish unavailable";
+  });
+}
+function applyEngineMove(u,sid){
+  if(sid!==S.engineSession||!S.game||S.gameOver||S.viewPly!==S.history.length||S.game.turn()!==S.engineColor)return;
+  const from=u.slice(0,2),to=u.slice(2,4),promotion=u.length>=5?u[4]:"q";
+  const legal=S.game.moves({verbose:true}).find(m=>m.from===from&&m.to===to&&(!m.promotion||m.promotion===promotion));
+  if(!legal){S.engineBusy=false;$('engineStatus').className='engine-status error';$('engineStatus').textContent='Stockfish returned an invalid move';return}
+  playMove(from,to,promotion);
+  if(!S.gameOver){$('engineStatus').className='engine-status ready';$('engineStatus').textContent='Stockfish ready'}
+}
+document.addEventListener("keydown",e=>{if($("gameScreen").style.display==="none")return;if(e.key==="ArrowLeft"){$("navPrev").click();e.preventDefault()}if(e.key==="ArrowRight"){$("navNext").click();e.preventDefault()}if(e.key==="Home"){$("navStart").click();e.preventDefault()}if(e.key==="End"){$("navLast").click();e.preventDefault()}});
+/* FIDE board geometry self-checks. a1 must be dark and h1 must be light. */
+function validateBoardGeometry(){const checks=[squareClass(1,0)==="dark",squareClass(1,7)==="light",squareClass(8,0)==="light",squareClass(8,7)==="dark"];return checks.every(Boolean)}
+if(!validateBoardGeometry()){alert("MyChess64 board geometry validation failed. Game start has been disabled.");$("startBtn").disabled=true}
+if(typeof Chess!=="function"){$("startBtn").disabled=true;$("startBtn").textContent="Chess Library Unavailable";$("engineNote").textContent="chess.js could not be loaded. Check your internet connection and reload."}
+showHome();
+</script>
+</body>
+</html>
