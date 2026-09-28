@@ -112,7 +112,7 @@ button:focus-visible,.tab:focus-visible{outline:3px solid rgba(9,105,232,.25);ou
 .room-chip{font-size:.78rem;color:var(--muted);padding:6px 9px;border:1px solid var(--border);border-radius:7px;}
 .game-layout{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:12px;padding:8px;}
 .board-zone{min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-#board{width:min(100%,calc(100dvh - 70px));height:min(100%,calc(100dvh - 70px));max-width:100%;max-height:100%;aspect-ratio:1/1;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));border-radius:2px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.28);touch-action:manipulation;flex:0 0 auto;}
+#board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));border-radius:2px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.28);touch-action:manipulation;flex:0 0 auto;}
 #board{position:relative;}
 #board .arrow-layer{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none;overflow:visible;}
 #board .arrow-line{fill:none;stroke-width:.16;stroke-linecap:round;stroke-linejoin:round;}
@@ -188,7 +188,7 @@ button:focus-visible,.tab:focus-visible{outline:3px solid rgba(9,105,232,.25);ou
   .game-app{height:auto;min-height:100dvh;grid-template-rows:52px auto;}
   .game-layout{grid-template-columns:1fr;gap:8px;padding:5px;}
   .board-zone{min-height:auto;overflow:visible;}
-  #board{width:min(calc(100vw - 10px),calc(100dvh - 130px));height:auto;max-width:calc(100vw - 10px);max-height:calc(100dvh - 130px);aspect-ratio:1/1;}
+  
   .side-panel{min-height:0;height:auto;max-height:none;}
 }
 @media(max-width:520px){
@@ -223,7 +223,7 @@ button:focus-visible,.tab:focus-visible{outline:3px solid rgba(9,105,232,.25);ou
   .game-app{height:100dvh;min-height:0;grid-template-rows:52px minmax(0,1fr);}
   .game-layout{height:100%;min-height:0;grid-template-columns:minmax(0,1fr) 300px;gap:8px;padding:5px;}
   .board-zone{min-width:0;min-height:0;height:100%;overflow:hidden;}
-  #board{width:min(100%,calc(100dvh - 65px));height:auto;max-width:100%;max-height:calc(100dvh - 65px);aspect-ratio:1/1;}
+  
   .side-panel{height:100%;max-height:100%;min-height:0;overflow:hidden;}
   .players-panel{padding:7px;gap:5px;}
   .player-row{padding:7px 8px;gap:6px;}
@@ -249,7 +249,7 @@ button:focus-visible,.tab:focus-visible{outline:3px solid rgba(9,105,232,.25);ou
   .game-app{height:100dvh;min-height:0;grid-template-rows:52px minmax(0,1fr);}
   .game-layout{height:100%;min-height:0;grid-template-columns:minmax(0,1fr) clamp(300px,24vw,360px);gap:10px;padding:6px;}
   .board-zone{height:100%;min-width:0;min-height:0;overflow:hidden;}
-  #board{width:min(100%,calc(100dvh - 64px));height:auto;max-width:100%;max-height:calc(100dvh - 64px);aspect-ratio:1/1;}
+  
   .side-panel{height:100%;max-height:100%;min-height:0;overflow:hidden;}
   .players-panel{flex:0 0 auto;}
   .notation-wrap{min-height:0;flex:1 1 auto;overflow:hidden;}
@@ -266,7 +266,7 @@ button:focus-visible,.tab:focus-visible{outline:3px solid rgba(9,105,232,.25);ou
   .brand-name{font-size:.96rem;}
   .game-layout{height:100%;min-height:0;grid-template-columns:minmax(0,1fr) 285px;gap:7px;padding:5px;}
   .board-zone{height:100%;min-width:0;min-height:0;overflow:hidden;}
-  #board{width:min(100%,calc(100dvh - 60px));height:auto;max-width:100%;max-height:calc(100dvh - 60px);aspect-ratio:1/1;}
+  
   .side-panel{height:100%;max-height:100%;min-height:0;overflow:hidden;}
   .players-panel{padding:7px;gap:5px;flex:0 0 auto;}
   .player-row{padding:7px 8px;gap:6px;}
@@ -290,7 +290,7 @@ button:focus-visible,.tab:focus-visible{outline:3px solid rgba(9,105,232,.25);ou
   .top-actions button{width:34px;height:34px;}
   .game-layout{height:100%;min-height:0;grid-template-columns:minmax(0,1fr) clamp(250px,34vw,285px);gap:5px;padding:4px;}
   .board-zone{height:100%;min-width:0;min-height:0;overflow:hidden;}
-  #board{width:min(100%,calc(100dvh - 56px));height:auto;max-width:100%;max-height:calc(100dvh - 56px);aspect-ratio:1/1;}
+  
   .side-panel{height:100%;max-height:100%;min-height:0;overflow:hidden;border-radius:8px;}
   .players-panel{padding:5px;gap:4px;flex:0 0 auto;}
   .player-row{padding:5px 6px;gap:5px;}
@@ -318,7 +318,7 @@ button:focus-visible,.tab:focus-visible{outline:3px solid rgba(9,105,232,.25);ou
   .game-topbar{padding:0 8px;}
   .game-layout{height:auto;min-height:0;display:grid;grid-template-columns:1fr;gap:6px;padding:4px;}
   .board-zone{height:auto;min-height:0;overflow:visible;}
-  #board{width:min(calc(100vw - 8px),calc(100dvh - 180px));height:auto;max-width:calc(100vw - 8px);max-height:calc(100dvh - 180px);aspect-ratio:1/1;}
+  
   .side-panel{height:auto;max-height:none;min-height:0;overflow:hidden;border-radius:8px;}
   .players-panel{padding:7px;gap:5px;flex:0 0 auto;}
   .player-row{padding:7px 8px;}
@@ -338,7 +338,7 @@ button:focus-visible,.tab:focus-visible{outline:3px solid rgba(9,105,232,.25);ou
   .top-actions{gap:4px;}
   .top-actions button{width:34px;height:34px;}
   .game-layout{padding:3px;gap:5px;}
-  #board{width:min(calc(100vw - 6px),calc(100dvh - 165px));height:auto;max-width:calc(100vw - 6px);max-height:calc(100dvh - 165px);aspect-ratio:1/1;}
+  
   .players-panel{padding:6px;gap:4px;}
   .player-row{padding:6px 7px;gap:6px;}
   .player-name{font-size:.88rem;}
@@ -364,7 +364,7 @@ html,body{overflow:hidden} body{margin:0}
 .promotion-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}.promotion-btn{height:62px;border:1px solid var(--border);background:var(--panel2);border-radius:8px}.promotion-btn img{width:48px;height:48px}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}.modal.show{display:flex}.modal-card{width:min(400px,100%);background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.22)}.modal-title{font-size:18px;font-weight:900}.modal-text{font-size:12px;color:var(--muted);line-height:1.5;margin-top:7px}.modal-actions{display:flex;gap:7px;margin-top:16px}.modal-actions button{flex:1;padding:8px;border-radius:7px;border:1px solid var(--border);font-weight:800}.modal-actions .ok{background:var(--accent);color:#fff;border-color:var(--accent)}
 .board-piece{width:100%;height:100%;object-fit:contain;padding:2%;position:relative;z-index:2;pointer-events:none;user-select:none;-webkit-user-drag:none}.friend-black-piece{transform:rotate(180deg)}.sq{position:relative}.sq.check-square{box-shadow:inset 0 0 0 5px rgba(211,74,74,.82)}.sq.last-from,.sq.last-to{background-image:linear-gradient(rgba(246,211,101,.30),rgba(246,211,101,.30))}.sq.sel{box-shadow:inset 0 0 0 4px rgba(246,211,101,.98)}.sq.move::after{z-index:3}.coord{z-index:4}
-@media(max-width:900px) and (orientation:portrait){html,body{overflow:auto}.game-app{height:auto;min-height:100dvh;grid-template-rows:48px auto}.game-layout{height:auto;min-height:0;display:grid;grid-template-columns:1fr;gap:6px;padding:4px}.board-zone{height:auto;overflow:hidden}#board{width:min(calc(100vw - 8px),calc(100dvh - 180px));height:auto;max-width:calc(100vw - 8px);max-height:none}.side-panel{height:auto;max-height:none;overflow:hidden}.notation-wrap{height:clamp(150px,24vh,260px);min-height:150px;flex:0 0 auto}}
+@media(max-width:900px) and (orientation:portrait){html,body{overflow:auto}.game-app{height:auto;min-height:100dvh;grid-template-rows:48px auto}.game-layout{height:auto;min-height:0;display:grid;grid-template-columns:1fr;gap:6px;padding:4px}.board-zone{height:auto;overflow:hidden}.side-panel{height:auto;max-height:none;overflow:hidden}.notation-wrap{height:clamp(150px,24vh,260px);min-height:150px;flex:0 0 auto}}
 @media(max-width:560px){.mode-grid{grid-template-columns:1fr}.home-card,.setup-card{padding:18px}.home-title{font-size:30px}.setup-actions{grid-template-columns:1fr 1.7fr}.clock{font-size:1.15rem;min-width:78px}.move-nav button,.control-grid button,.game-actions button{padding:7px 5px;font-size:.72rem}}
 
 
@@ -372,13 +372,46 @@ html,body{overflow:hidden} body{margin:0}
 .draw-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}.draw-actions button{width:100%;margin:0;padding:8px 7px}.draw-actions button:disabled{opacity:.45;cursor:not-allowed}.fide-note{font-size:.62rem;color:var(--muted);text-align:center;margin-top:4px}.engine-status.ready{color:var(--accent2);font-weight:800}.engine-status.error{color:var(--danger);font-weight:800}.board-legal-badge{font-size:.62rem;color:var(--muted);text-align:center;margin-top:2px}.draw-pending{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
 
 /* FINAL BOARD GEOMETRY LOCK — keep the board exactly square in every supported viewport. */
-@media (min-width:901px){#board{width:min(100%,calc(100dvh - 70px));height:min(100%,calc(100dvh - 70px));max-width:100%;max-height:100%;}}
-@media (min-width:721px) and (max-width:900px){#board{width:min(100%,calc(100dvh - 65px));height:min(100%,calc(100dvh - 65px));max-width:100%;max-height:100%;}}
-@media (max-width:720px) and (orientation:landscape){#board{width:min(100%,calc(100dvh - 56px));height:min(100%,calc(100dvh - 56px));max-width:100%;max-height:100%;}}
-@media (max-width:900px) and (orientation:portrait){#board{width:min(calc(100vw - 8px),calc(100dvh - 180px));height:min(calc(100vw - 8px),calc(100dvh - 180px));max-width:calc(100vw - 8px);max-height:none;}}
+@media (min-width:901px){}
+@media (min-width:721px) and (max-width:900px){}
+@media (max-width:720px) and (orientation:landscape){}
+@media (max-width:900px) and (orientation:portrait){}
 /* MyChess64 board rendering safety fix: all three game modes. */
 #board{display:grid!important;grid-template-columns:repeat(8,minmax(0,1fr))!important;grid-template-rows:repeat(8,minmax(0,1fr))!important;overflow:hidden!important;}
 #board>.sq{min-width:0!important;min-height:0!important;width:auto!important;height:auto!important;}
+
+/* =========================================================
+   MyChess64 BOARD GEOMETRY FIX V3 — SINGLE AUTHORITATIVE MODEL
+   The board is a square whose WIDTH is constrained by the available
+   board column and viewport height. HEIGHT is deliberately automatic.
+   CSS aspect-ratio then derives the height from that one dimension.
+   No percentage height, max-height, or competing board size rule remains.
+   ========================================================= */
+#board{
+  width:min(100%,calc(100dvh - 70px)) !important;
+  height:auto !important;
+  aspect-ratio:1 / 1 !important;
+  max-width:100% !important;
+  max-height:none !important;
+  flex:0 0 auto !important;
+  display:grid !important;
+  grid-template-columns:repeat(8,minmax(0,1fr)) !important;
+  grid-template-rows:repeat(8,minmax(0,1fr)) !important;
+}
+@media (min-width:901px){
+  #board{width:min(100%,calc(100dvh - 70px)) !important;height:auto !important;max-width:100% !important;max-height:none !important;}
+}
+@media (min-width:721px) and (max-width:900px) and (orientation:landscape){
+  #board{width:min(100%,calc(100dvh - 58px)) !important;height:auto !important;max-width:100% !important;max-height:none !important;}
+}
+@media (max-width:720px) and (orientation:landscape){
+  #board{width:min(100%,calc(100dvh - 52px)) !important;height:auto !important;max-width:100% !important;max-height:none !important;}
+}
+@media (max-width:900px) and (orientation:portrait){
+  #board{width:min(100%,calc(100vw - 8px)) !important;height:auto !important;aspect-ratio:1 / 1 !important;max-width:calc(100vw - 8px) !important;max-height:none !important;}
+}
+#board>.sq{width:auto !important;height:auto !important;min-width:0 !important;min-height:0 !important;}
+
 </style>
 </head>
 <body>
