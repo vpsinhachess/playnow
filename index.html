@@ -112,7 +112,7 @@ button:focus-visible,.tab:focus-visible{outline:3px solid rgba(9,105,232,.25);ou
 .room-chip{font-size:.78rem;color:var(--muted);padding:6px 9px;border:1px solid var(--border);border-radius:7px;}
 .game-layout{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:12px;padding:8px;}
 .board-zone{min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-#board{width:min(100%,calc(100dvh - 70px));height:min(100%,calc(100dvh - 70px));max-width:100%;max-height:100%;aspect-ratio:1/1;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);border-radius:2px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.28);touch-action:manipulation;flex:0 0 auto;}
+#board{width:min(100%,calc(100dvh - 70px));height:min(100%,calc(100dvh - 70px));max-width:100%;max-height:100%;aspect-ratio:1/1;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));border-radius:2px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.28);touch-action:manipulation;flex:0 0 auto;}
 #board{position:relative;}
 #board .arrow-layer{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none;overflow:visible;}
 #board .arrow-line{fill:none;stroke-width:.16;stroke-linecap:round;stroke-linejoin:round;}
@@ -124,7 +124,7 @@ button:focus-visible,.tab:focus-visible{outline:3px solid rgba(9,105,232,.25);ou
 #board.arrow-drawing{cursor:crosshair;}
 #board .sq{z-index:1;}
 
-.sq{display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;-webkit-user-select:none;position:relative;overflow:hidden;}
+.sq{display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;-webkit-user-select:none;position:relative;overflow:hidden;min-width:0;min-height:0;}
 .sq.light{background:var(--sq-light)} .sq.dark{background:var(--sq-dark)}
 .sq.sel{box-shadow:inset 0 0 0 4px rgba(246,211,101,.98);}
 .sq.move::after{content:'';position:absolute;width:24%;height:24%;border-radius:50%;background:rgba(54,100,48,.72);z-index:1;}
@@ -376,6 +376,9 @@ html,body{overflow:hidden} body{margin:0}
 @media (min-width:721px) and (max-width:900px){#board{width:min(100%,calc(100dvh - 65px));height:min(100%,calc(100dvh - 65px));max-width:100%;max-height:100%;}}
 @media (max-width:720px) and (orientation:landscape){#board{width:min(100%,calc(100dvh - 56px));height:min(100%,calc(100dvh - 56px));max-width:100%;max-height:100%;}}
 @media (max-width:900px) and (orientation:portrait){#board{width:min(calc(100vw - 8px),calc(100dvh - 180px));height:min(calc(100vw - 8px),calc(100dvh - 180px));max-width:calc(100vw - 8px);max-height:none;}}
+/* MyChess64 board rendering safety fix: all three game modes. */
+#board{display:grid!important;grid-template-columns:repeat(8,minmax(0,1fr))!important;grid-template-rows:repeat(8,minmax(0,1fr))!important;overflow:hidden!important;}
+#board>.sq{min-width:0!important;min-height:0!important;width:auto!important;height:auto!important;}
 </style>
 </head>
 <body>
@@ -485,17 +488,20 @@ function squareClass(rank,fi){/* FIDE: a1 is dark; h1 is light. */return ((rank+
 function renderBoard(){
   const g=S.viewPly===S.history.length?S.game:boardGame(S.viewPly),live=S.viewPly===S.history.length,b=$("board");b.innerHTML="";
   const ranks=S.orientation==="w"?[8,7,6,5,4,3,2,1]:[1,2,3,4,5,6,7,8],files=S.orientation==="w"?[0,1,2,3,4,5,6,7]:[7,6,5,4,3,2,1,0];
+  const checkedKing = g.in_check() ? kingSquare(g,g.turn()) : null;
+  const frag=document.createDocumentFragment();
   for(let r=0;r<8;r++)for(let f=0;f<8;f++){
     const rank=ranks[r],fi=files[f],sq=FILES[fi]+rank,p=g.get(sq),d=document.createElement("div");d.className="sq "+squareClass(rank,fi);
     if(live&&S.lastMove&&(S.lastMove.from===sq||S.lastMove.to===sq))d.classList.add(S.lastMove.from===sq?"last-from":"last-to");
     if(live&&S.selected===sq)d.classList.add("sel");
     if(live&&S.targets[sq])d.classList.add(S.targets[sq].captured?"move capture":"move");
-    if(g.in_check()&&kingSquare(g,g.turn())===sq)d.classList.add("check-square");
+    if(checkedKing===sq)d.classList.add("check-square");
     if(r===7){const c=document.createElement("span");c.className="coord file";c.textContent=FILES[fi];d.appendChild(c)}
     if(f===7){const c=document.createElement("span");c.className="coord rank";c.textContent=rank;d.appendChild(c)}
     if(p){const img=document.createElement("img");img.className="board-piece"+(S.mode==="friend"&&p.color==="b"?" friend-black-piece":"");img.src=PIECE_URL+p.color+p.type.toUpperCase()+".svg";img.alt="";img.draggable=false;d.appendChild(img)}
-    d.onpointerdown=e=>{e.preventDefault();if(live)onSquare(sq)};b.appendChild(d)
+    d.onpointerdown=e=>{e.preventDefault();if(live)onSquare(sq)};frag.appendChild(d)
   }
+  b.appendChild(frag);
   $("livePill").textContent=live?"LIVE":"REVIEW";$("livePill").classList.toggle("review",!live);
 }
 function onSquare(sq){if(S.gameOver||S.viewPly!==S.history.length||(S.mode==="computer"&&(S.game.turn()!==S.humanColor||S.engineBusy)))return;const p=S.game.get(sq);if(S.selected){const m=S.targets[sq];if(m){if(m.piece==="p"&&(sq[1]==="8"||sq[1]==="1"))openPromotion(S.selected,sq);else playMove(S.selected,sq,m.promotion||"q");return}if(p&&p.color===S.game.turn()){selectSquare(sq);return}S.selected=null;S.targets={};renderBoard();return}if(p&&p.color===S.game.turn())selectSquare(sq)}
